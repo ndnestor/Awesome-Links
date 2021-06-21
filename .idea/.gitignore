@@ -1,0 +1,10 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+
+# User added ignored files
+/node_modules
+/Object Planning.drawio
+/package-lock.json
