@@ -35,10 +35,38 @@ const methods = {
     },
 
     // Returns an array of records by field value in specified table
-    searchInField: function(tableName, fieldName, fieldValue) {
-        cachedRecords[tableName].forEach(element => {
-            console.log(element);
-        });
+    searchInField: function(tableName, fieldName, fieldValue, isExact) {
+        return new Promise((resolve, reject) => {
+            try {
+                let searchResults = [];
+
+                if(cachedRecords[tableName] !== undefined) {
+                    cachedRecords[tableName].forEach(record => {
+                        if(isExact) {
+                            if(record[fieldName] === fieldValue) {
+                                searchResults.push(record);
+                            }
+                        } else {
+                            if(typeof record[fieldName] === 'string') {
+                                if(record[fieldName].contains(fieldValue)) {
+                                    searchResults.push(record);
+                                }
+                            } else if(record[fieldName] === fieldValue) {
+                                searchResults.push(record);
+                            } else {
+                                console.log('Record ' + record[fieldName] + ' does not match ' + fieldValue);
+                            }
+                        }
+                    });
+                } else {
+                    console.log('Requested table has no entrees');
+                }
+
+                resolve(searchResults);
+            } catch(error) {
+                reject(error);
+            }
+        })
     }
 };
 
