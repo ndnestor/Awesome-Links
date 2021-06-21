@@ -1,5 +1,4 @@
 const Express = require('express');
-const BodyParser = require('body-parser');
 
 const airtableInterface = require('./airtable-intereface.js');
 
@@ -23,6 +22,7 @@ app.all('/', async(req, res) => {
 // Used for testing methods
 app.all('/test', async(req, res) => {
     console.log("Test request was made");
-    airtableInterface.updateRecords('Employees');
-    res.end();
+    airtableInterface.updateRecords('Employees').then((records) => {
+        res.send(records);
+    });
 });
