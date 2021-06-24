@@ -15,8 +15,8 @@ const cachedRecords = {};
 
 const methods = {
     // Returns an array of records in the specified table and updates record cache
-    updateRecords: function(tableName) {
-        logger.info(`Updating record cache for "${tableName}"`)
+    cacheRecords: function(tableName) {
+        logger.info(`Caching records for "${tableName}"`)
         return new Promise((resolve, reject) => {
             try {
                 let updatedRecords = [];
@@ -83,6 +83,46 @@ const methods = {
                 logger.error(`Could not search for record by field value\n` +
                     `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"\n` +
                     `${error}`);
+                logger.trace();
+                reject(error);
+            }
+        });
+    },
+
+    // Add a record to the specified table
+    addRecords: function(tableName, records) {
+        logger.info(`Adding record to "${tableName}"`)
+        return new Promise((resolve, reject) => {
+            try {
+                airtableBase(tableName).create(records, {typecast: true}).then((addedRecords) => {
+                    resolve(addedRecords);
+                }).catch((error) => {
+                    logger.error(`Could not add record to "${tableName}"\n${error}`);
+                    logger.trace();
+                    reject(error);
+                });
+            } catch(error) {
+                logger.error(`Could not add record to "${tableName}"\n${error}`);
+                logger.trace();
+                reject(error);
+            }
+        });
+    },
+
+    // Deletes a record in the specified table
+    deleteRecords: function(tableName, recordIDs) {
+        logger.info(`Deleting record(s) from "${tableName}" with ID(s) "${recordIDs}"`);
+        return new Promise((resolve, reject) => {
+            try {
+                airtableBase(tableName).destroy(recordIDs).then((deletedRecords) => {
+                    resolve(deletedRecords);
+                }).catch((error) => {
+                    logger.error(`Could not delete record(s) from "${tableName}" with ID(s) "${recordIDs}"\n${error}`);
+                    logger.trace();
+                    reject(error);
+                });
+            } catch(error) {
+                logger.error(`Could not delete record(s) from "${tableName}" with ID(s) "${recordIDs}"\n${error}`);
                 logger.trace();
                 reject(error);
             }
