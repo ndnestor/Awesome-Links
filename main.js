@@ -13,7 +13,7 @@ const port = 3000;
 // -- SERVER SETUP -- //
 
 // Initialization
-airtableInterface.updateRecords('Employees');
+airtableInterface.cacheRecords('Employees');
 
 // Allow connections to the server
 app.listen(port, () => {
@@ -31,9 +31,9 @@ app.all('/', async(req, res) => {
 });
 
 // Updates the record cache
-app.get('/update-records', async(req, res) => {
-    logger.info('Request on /update-records was made');
-    airtableInterface.updateRecords('Employees').then((records) => {
+app.get('/cache-records', async(req, res) => {
+    logger.info('Request on /cache-records was made');
+    airtableInterface.cacheRecords('Employees').then((records) => {
         logger.info(`Sending response`);
         res.send(records);
     }).catch((error) => {
@@ -48,6 +48,45 @@ app.get('/search-records', async(req, res) => {
     airtableInterface.searchInField('Employees', 'First Name', 'Nathan', true).then((records) => {
         logger.info(`Sending response`);
         res.send(records);
+    }).catch((error) => {
+        // TODO: Send error codes and log it
+        res.end();
+    });
+});
+
+// Adds record(s) to the given table
+app.get('/add-record', async(req, res) => {
+   logger.info('Request on /add-record was made');
+   const newRecord = {};
+   newRecord['fields'] = {};
+   const fields = newRecord['fields'];
+   fields['First Name'] = 'John';
+   fields['Last Name'] = 'Doe';
+   fields['Is Intern'] = true;
+   fields['Is Current Employee'] = true;
+   fields['Nickname'] = '';
+   fields['Birthday'] = '2000-01-20';
+   // TODO: Change database to reflect array values as plural
+   fields['Email'] = ['recAQEocPLU7y3cLs'];
+   fields['Phone'] = ['recGx1QuzIblMY7gG'];
+   fields['Position'] = 'Test Dummy';
+   fields['Jobs'] = ['recCyh1l0kr0tkhzu'];
+   fields['Description'] = 'A test persons for the database';
+   fields['Employed Time'] = ['recQlfWTCGIcjH08r'];
+
+   airtableInterface.addRecords('Employees', [newRecord]).then((records) => {
+       res.send(records);
+   }).catch((error) => {
+       // TODO: Send error codes and log it
+        res.end();
+    });
+});
+
+// Deletes record(s) from the given table
+app.get('/delete-record', async(req, res) => {
+    logger.info('Rest on /delete-record was made');
+    airtableInterface.deleteRecords('Employees', ['rec9dDQuQHFEbhxa8']).then((deletedRecords) => {
+        res.send(deletedRecords);
     }).catch((error) => {
         // TODO: Send error codes and log it
         res.end();
