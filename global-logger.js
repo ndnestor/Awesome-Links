@@ -4,7 +4,7 @@ const Moment = require('moment');
 const FS = require('fs');
 
 // Other variable declarations
-const logFilePath = `./logs/${Moment().format('[YYYY-MM-DD] HH-mm-ss ZZ')} Awesome Links.log`;
+const logFilePath = `./logs/${Moment().format('YYYY-MM-DD - HH-mm-ss ZZ')} Awesome Links.log`;
 const writeFileInterval = 1000; // In ms
 const writeFileBuffer = [];
 let writeFileTimerIsActive; //? A bit verbose, consider renaming
@@ -13,11 +13,16 @@ const consoleHandler = Logger.createDefaultHandler();
 // Initialization
 Logger.setLevel(Logger.DEBUG);
 Logger.setHandler((messages, context) => {
+    let messageBundle = { messages: messages, context: context };
+
+    // Beautify message
+    messages[0] = messageBundleToString(messageBundle);
+
     // Send message to console
     consoleHandler(messages, context);
 
     // Add to write buffer to be written to a file later
-    writeFileBuffer.push(messages);
+    writeFileBuffer.push(messageBundle.messages[0]);
     if(!writeFileTimerIsActive) {
         setTimeout(writeBufferToLogFile, writeFileInterval);
         writeFileTimerIsActive = true;
@@ -25,25 +30,41 @@ Logger.setHandler((messages, context) => {
 
 });
 
+// -- PRIVATE METHODS -- //
+
 // Writes the messages in writeFileBuffer to a log file
 function writeBufferToLogFile() {
 
-    // Loop through messages and concatenate them
-    let messageToWrite = '';
-    writeFileBuffer.forEach((message) => {
-        messageToWrite += message[0] + '\n';
-    });
+    try {
+        // Loop through messages and concatenate them
+        let messageToWrite = '';
+        writeFileBuffer.forEach((message) => {
+            messageToWrite += message + '\n';
+        });
 
-    // Write message to log file
-    FS.appendFile(logFilePath, messageToWrite, { flag: 'a' }, (error) => {
-        if(error) {
-            console.error(`Failed to write log message to file with the following error:\n${error}`);
-        }
-    });
+        // Write message to log file
+        FS.appendFile(logFilePath, messageToWrite, {flag: 'a'}, (error) => {
+            if(error) {
+                console.error(`Failed to write log message to file with the following error:\n${error}`);
+            }
+        });
+    } catch(error) {
+        console.error(`Could not write message to log file`);
+    } finally {
 
-    // Clear buffer
-    writeFileBuffer.length = 0;
+        // Clear buffer and reset timer
+        writeFileBuffer.length = 0;
+        writeFileTimerIsActive = false;
+    }
 }
+
+// Given a message and context (message bundle), returns a message that is log/console friendly
+function messageBundleToString(messageBundle) {
+    return `[${Moment().format('YYYY-MM-DD | HH:mm:ss UTCZZ')}][${messageBundle.context.level.name}]: ${messageBundle.messages[0]}`;
+}
+
+
+// -- PUBLIC METHODS --//
 
 // TODO: Determine some way to handle verbose messages
 const methods = {
@@ -65,6 +86,7 @@ const methods = {
         Logger.error(message.toString());
     },
     trace: function() {
+        // TODO: Have stack trace write to log file
         Logger.trace('Stack trace:');
         console.trace();
     }
