@@ -17,7 +17,7 @@ airtableInterface.cacheRecords('Employees');
 
 // Allow connections to the server
 app.listen(port, () => {
-    logger.info(`[====== The server is listening on port ${port} ======]`);
+    logger.info(`The server is listening on port ${port}`);
 });
 
 
