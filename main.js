@@ -9,17 +9,31 @@ const logger = require('./global-logger.js');
 // Other variable declarations
 const app = Express();
 const jsonParser = BodyParser.json();
-const port = 3000;
+const statusCodes = {
+    // Success responses TODO: Use these
+    OK: 200,
+    CREATED: 201,
+
+    // Client errors
+    BAD_REQUEST: 400,
+    TOO_MANY_REQUESTS: 429, // TODO: Use this for Airtable requests
+
+    // Server errors
+    INTERNAL_SERVER_ERROR: 500
+};
+const PORT = 3000;
 
 
 // -- SERVER SETUP -- //
 
 // Cache part of database
-airtableInterface.cacheRecords('Employees');
+airtableInterface.cacheRecords('Employees').catch((error) => {
+    // TODO: Log something
+});
 
 // Allow connections to the server
-app.listen(port, () => {
-    logger.info(`The server is listening on port ${port}`);
+app.listen(PORT, () => {
+    logger.info(`The server is listening on port ${PORT}`);
 });
 
 
@@ -36,72 +50,89 @@ app.all('/', async(req, res) => {
 app.put('/cache-records', jsonParser, async(req, res) => {
     logger.info('Request on /cache-records was made');
 
-    const tableName = req.body["Table Name"];
+    try {
+        const tableName = req.body["Table Name"];
 
-    if(tableName === undefined) {
-        logger.warn('Response status set to 400');
-        res.status(400).end();
+        if (tableName === undefined) {
+            logger.warn('Response status set to 400');
+            res.status(statusCodes.BAD_REQUEST).end();
+        }
+
+        airtableInterface.cacheRecords(tableName).then((records) => {
+            logger.info(`Sending response`);
+            res.send(records);
+        }).catch((error) => {
+            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        });
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
     }
-
-    airtableInterface.cacheRecords(tableName).then((records) => {
-        logger.info(`Sending response`);
-        res.send(records);
-    }).catch((error) => {
-        logger.error(`Response status set to 500. Received error\n${error}`);
-        res.status(500).end();
-    });
 });
 
 // Searches for records in a table with a given (reliant on the record cache being up to date)
 app.get('/search-records', jsonParser, async(req, res) => {
     logger.info('Request on /search-records was made');
-    const tableName = req.body['Table Name'];
-    const fieldName = req.body['Field Name'];
-    const fieldValue = req.body['Field Value'];
-    const isExact = req.body['Is Exact'];
 
-    if(tableName === undefined || fieldName === undefined || fieldValue === undefined || isExact === undefined) {
-        logger.warn('Response status set to 400');
-        res.status(400).end();
+    try {
+        const tableName = req.body['Table Name'];
+        const fieldName = req.body['Field Name'];
+        const fieldValue = req.body['Field Value'];
+        const isExact = req.body['Is Exact'];
+
+        if(tableName === undefined || fieldName === undefined || fieldValue === undefined || isExact === undefined) {
+            logger.warn('Response status set to 400');
+            res.status(statusCodes.BAD_REQUEST).end();
+        }
+
+        airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
+            logger.info(`Sending response`);
+            res.send(records);
+        }).catch((error) => {
+            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        });
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
     }
-
-    airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
-        logger.info(`Sending response`);
-        res.send(records);
-    }).catch((error) => {
-        logger.error(`Response status set to 500. Received error\n${error}`);
-        res.status(500).end();
-    });
 });
 
 // Adds record(s) to the given table
 app.post('/add-record', jsonParser, async(req, res) => {
    logger.info('Request on /add-record was made');
 
-   const tableName = req.body['Table Name'];
-   const newRecords = req.body['New Records'];
+   try {
+       const tableName = req.body['Table Name'];
+       const newRecords = req.body['New Records'];
 
-   // TODO: Change database to reflect array values as plural
-
-   airtableInterface.addRecords(tableName, newRecords).then((records) => {
-       res.send(records);
-   }).catch((error) => {
-       logger.error(`Response status set to 500. Received error\n${error}`);
-       res.status(500).end();
-    });
+       airtableInterface.addRecords(tableName, newRecords).then((records) => {
+           res.send(records);
+       }).catch((error) => {
+           endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+       });
+   } catch(error) {
+       endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+   }
 });
 
 // Deletes record(s) from the given table
 app.delete('/delete-record', jsonParser, async(req, res) => {
     logger.info('Rest on /delete-record was made');
 
-    const tableName = req.body['Table Name'];
-    const recordIDs = req.body['Record IDs'];
+    try {
+        const tableName = req.body['Table Name'];
+        const recordIDs = req.body['Record IDs'];
 
-    airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
-        res.send(deletedRecords);
-    }).catch((error) => {
-        logger.error(`Response status set to 500. Received error\n${error}`);
-        res.status(500).end();
-    });
+        airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
+            res.send(deletedRecords);
+        }).catch((error) => {
+            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        });
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
 });
+
+function endWithError(res, statusCode, error) {
+    logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
+    logger.trace();
+    res.status(statusCode).end();
+}
