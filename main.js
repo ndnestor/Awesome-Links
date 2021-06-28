@@ -55,17 +55,17 @@ app.put('/cache-records', jsonParser, async(req, res) => {
 // Searches for records in a table with a given (reliant on the record cache being up to date)
 app.get('/search-records', jsonParser, async(req, res) => {
     logger.info('Request on /search-records was made');
-    const tableName = req.body["Table Name"];
-    const fieldName = req.body["Field Name"];
-    const fieldValue = req.body["Field Value"];
+    const tableName = req.body['Table Name'];
+    const fieldName = req.body['Field Name'];
+    const fieldValue = req.body['Field Value'];
+    const isExact = req.body['Is Exact'];
 
-    if(tableName === undefined || fieldName === undefined || fieldValue === undefined) {
+    if(tableName === undefined || fieldName === undefined || fieldValue === undefined || isExact === undefined) {
         logger.warn('Response status set to 400');
         res.status(400).end();
     }
 
-    // TODO: Considering making isExact dynamic
-    airtableInterface.searchInField(tableName, fieldName, fieldValue, false).then((records) => {
+    airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
         logger.info(`Sending response`);
         res.send(records);
     }).catch((error) => {
