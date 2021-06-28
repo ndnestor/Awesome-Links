@@ -1,5 +1,6 @@
 // Module imports
 const Express = require('express');
+const BodyParser = require('body-parser');
 
 // Script imports
 const airtableInterface = require('./airtable-intereface.js');
@@ -7,12 +8,13 @@ const logger = require('./global-logger.js');
 
 // Other variable declarations
 const app = Express();
+const jsonParser = BodyParser.json();
 const port = 3000;
 
 
 // -- SERVER SETUP -- //
 
-// Initialization
+// Cache part of database
 airtableInterface.cacheRecords('Employees');
 
 // Allow connections to the server
@@ -31,64 +33,75 @@ app.all('/', async(req, res) => {
 });
 
 // Updates the record cache
-app.get('/cache-records', async(req, res) => {
+app.put('/cache-records', jsonParser, async(req, res) => {
     logger.info('Request on /cache-records was made');
-    airtableInterface.cacheRecords('Employees').then((records) => {
+
+    const tableName = req.body["Table Name"];
+
+    if(tableName === undefined) {
+        logger.warn('Response status set to 400');
+        res.status(400).end();
+    }
+
+    airtableInterface.cacheRecords(tableName).then((records) => {
         logger.info(`Sending response`);
         res.send(records);
     }).catch((error) => {
-        // TODO: Send error codes and log it
-        res.end();
+        logger.error(`Response status set to 500. Received error\n${error}`);
+        res.status(500).end();
     });
 });
 
-// Searches for records in a table with a given
-app.get('/search-records', async(req, res) => {
+// Searches for records in a table with a given (reliant on the record cache being up to date)
+app.get('/search-records', jsonParser, async(req, res) => {
     logger.info('Request on /search-records was made');
-    airtableInterface.searchInField('Employees', 'First Name', 'Nathan', true).then((records) => {
+    const tableName = req.body["Table Name"];
+    const fieldName = req.body["Field Name"];
+    const fieldValue = req.body["Field Value"];
+
+    if(tableName === undefined || fieldName === undefined || fieldValue === undefined) {
+        logger.warn('Response status set to 400');
+        res.status(400).end();
+    }
+
+    // TODO: Considering making isExact dynamic
+    airtableInterface.searchInField(tableName, fieldName, fieldValue, false).then((records) => {
         logger.info(`Sending response`);
         res.send(records);
     }).catch((error) => {
-        // TODO: Send error codes and log it
-        res.end();
+        logger.error(`Response status set to 500. Received error\n${error}`);
+        res.status(500).end();
     });
 });
 
 // Adds record(s) to the given table
-app.get('/add-record', async(req, res) => {
+app.post('/add-record', jsonParser, async(req, res) => {
    logger.info('Request on /add-record was made');
-   const newRecord = {};
-   newRecord['fields'] = {};
-   const fields = newRecord['fields'];
-   fields['First Name'] = 'John';
-   fields['Last Name'] = 'Doe';
-   fields['Is Intern'] = true;
-   fields['Is Current Employee'] = true;
-   fields['Nickname'] = '';
-   fields['Birthday'] = '2000-01-20';
-   // TODO: Change database to reflect array values as plural
-   fields['Email'] = ['recAQEocPLU7y3cLs'];
-   fields['Phone'] = ['recGx1QuzIblMY7gG'];
-   fields['Position'] = 'Test Dummy';
-   fields['Jobs'] = ['recCyh1l0kr0tkhzu'];
-   fields['Description'] = 'A test persons for the database';
-   fields['Employed Time'] = ['recQlfWTCGIcjH08r'];
 
-   airtableInterface.addRecords('Employees', [newRecord]).then((records) => {
+   const tableName = req.body['Table Name'];
+   const newRecords = req.body['New Records'];
+
+   // TODO: Change database to reflect array values as plural
+
+   airtableInterface.addRecords(tableName, newRecords).then((records) => {
        res.send(records);
    }).catch((error) => {
-       // TODO: Send error codes and log it
-        res.end();
+       logger.error(`Response status set to 500. Received error\n${error}`);
+       res.status(500).end();
     });
 });
 
 // Deletes record(s) from the given table
-app.get('/delete-record', async(req, res) => {
+app.delete('/delete-record', jsonParser, async(req, res) => {
     logger.info('Rest on /delete-record was made');
-    airtableInterface.deleteRecords('Employees', ['rec9dDQuQHFEbhxa8']).then((deletedRecords) => {
+
+    const tableName = req.body['Table Name'];
+    const recordIDs = req.body['Record IDs'];
+
+    airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
         res.send(deletedRecords);
     }).catch((error) => {
-        // TODO: Send error codes and log it
-        res.end();
+        logger.error(`Response status set to 500. Received error\n${error}`);
+        res.status(500).end();
     });
 });
