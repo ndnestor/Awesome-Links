@@ -13,7 +13,7 @@ const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 
 // Other variable declarations
 const cachedRecords = {};
-const MAX_DB_REQUESTS_PER_SECOND = 5; // TODO: Consider renaming verbose variable
+const MAX_DB_REQUESTS_PER_SECOND = 4; // Airtable can handle 5 with free version. Put 4 just to be safe
 
 var timeSinceLastDbRequest = 0; // In ms
 
@@ -22,14 +22,16 @@ setInterval(() => {
     timeSinceLastDbRequest++;
 }, 1);
 
+// Prevents database requests occurring too often
+//! All database requests should be handled through this
 //! Untested method
-function performDbRequestLogic(method, reject) { // TODO: Consider changing poor method name
+function handleDbRequest(method, reject) {
     try {
         // Check if we are sending requests too fast
         let timeoutTime = 0;
         if(timeSinceLastDbRequest < (1 / MAX_DB_REQUESTS_PER_SECOND) * 1000) {
             // Request was sent too fast. Wait some time before sending a new one
-            // TODO: Add buffer time and add log
+            logger.info('Deferring database request to prevent overload');
             timeoutTime = 1 / MAX_DB_REQUESTS_PER_SECOND - timeSinceLastDbRequest;
         }
 
@@ -51,7 +53,7 @@ const methods = {
         logger.info(`Caching records for "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
-                performDbRequestLogic(() => {
+                handleDbRequest(() => {
                     let updatedRecords = [];
 
                     // Select the desired table and loop through records
@@ -84,7 +86,7 @@ const methods = {
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
-                performDbRequestLogic(() => {
+                handleDbRequest(() => {
                     let searchResults = [];
 
                     // Check if table has been cached
@@ -129,7 +131,7 @@ const methods = {
         logger.info(`Adding record to "${tableName}"`)
         return new Promise((resolve, reject) => {
             try {
-                performDbRequestLogic(() => {
+                handleDbRequest(() => {
                     airtableBase(tableName).create(records, {typecast: true}).then((addedRecords) => {
                         resolve(addedRecords);
                     }).catch((error) => {
@@ -152,7 +154,7 @@ const methods = {
         logger.info(`Deleting record(s) from "${tableName}" with ID(s) "${recordIDs}"`);
         return new Promise((resolve, reject) => {
             try {
-                performDbRequestLogic(() => {
+                handleDbRequest(() => {
                     airtableBase(tableName).destroy(recordIDs).then((deletedRecords) => {
                         resolve(deletedRecords);
                     }).catch((error) => {

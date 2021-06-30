@@ -10,13 +10,12 @@ const logger = require('./global-logger.js');
 const app = Express();
 const jsonParser = BodyParser.json();
 const statusCodes = {
-    // Success responses TODO: Use these
+    // Success responses
     OK: 200,
     CREATED: 201,
 
     // Client errors
     BAD_REQUEST: 400,
-    TOO_MANY_REQUESTS: 429, // TODO: Use this for Airtable requests
 
     // Server errors
     INTERNAL_SERVER_ERROR: 500
@@ -28,7 +27,8 @@ const PORT = 3000;
 
 // Cache part of database
 airtableInterface.cacheRecords('Employees').catch((error) => {
-    // TODO: Log something
+    logger.error(`Could not do initial record caching for Employees table due to error\n${error}`);
+    logger.trace();
 });
 
 // Allow connections to the server
@@ -43,7 +43,7 @@ app.listen(PORT, () => {
 // May be changed to serve a different function later
 app.all('/', async(req, res) => {
     logger.info("Request on root was made");
-    res.send("The server is running");
+    res.status(statusCodes.OK).send("The server is running");
 });
 
 // Updates the record cache
@@ -60,7 +60,7 @@ app.put('/cache-records', jsonParser, async(req, res) => {
 
         airtableInterface.cacheRecords(tableName).then((records) => {
             logger.info(`Sending response`);
-            res.send(records);
+            res.status(statusCodes.OK).send(records);
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
@@ -86,7 +86,7 @@ app.get('/search-records', jsonParser, async(req, res) => {
 
         airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
             logger.info(`Sending response`);
-            res.send(records);
+            res.status(statusCodes.OK).send(records);
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
@@ -104,7 +104,7 @@ app.post('/add-record', jsonParser, async(req, res) => {
        const newRecords = req.body['New Records'];
 
        airtableInterface.addRecords(tableName, newRecords).then((records) => {
-           res.send(records);
+           res.status(statusCodes.CREATED).send(records);
        }).catch((error) => {
            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
        });
@@ -122,7 +122,7 @@ app.delete('/delete-record', jsonParser, async(req, res) => {
         const recordIDs = req.body['Record IDs'];
 
         airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
-            res.send(deletedRecords);
+            res.status(statusCodes.OK).send(deletedRecords);
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });

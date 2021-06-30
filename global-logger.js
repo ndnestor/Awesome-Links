@@ -66,7 +66,6 @@ function messageBundleToString(messageBundle) {
 
 // -- PUBLIC METHODS --//
 
-// TODO: Determine some way to handle verbose messages
 const methods = {
 
     // Returns the Logger object. Used to change Logger settings from outside this script
@@ -86,9 +85,8 @@ const methods = {
         Logger.error(message.toString());
     },
     trace: function() {
-        // TODO: Have stack trace write to log file
-        Logger.trace('Stack trace:');
-        console.trace();
+        const stackTrace = new Error().stack;
+        Logger.trace(`Stack trace:\n${stackTrace}`);
     }
 };
 
