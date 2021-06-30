@@ -15,12 +15,13 @@ const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 const cachedRecords = {};
 const MAX_DB_REQUESTS_PER_SECOND = 4; // Airtable can handle 5 with free version. Put 4 just to be safe
 
-var timeSinceLastDbRequest = 0; // In ms
+var timeSinceLastDbRequest = 1 / MAX_DB_REQUESTS_PER_SECOND * 1000 + 1; // In ms
 
 // Increment timeSinceLastDbRequest every ms
 setInterval(() => {
     timeSinceLastDbRequest++;
 }, 1);
+
 
 // -- PRIVATE METHODS -- //
 
@@ -152,6 +153,7 @@ const methods = {
 
 // Allow other files to use methods from this file
 module.exports = methods;
+
 
 // -- PUBLIC METHODS --//
 
