@@ -11,34 +11,67 @@ Airtable.configure({
 });
 const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 
+// Other variable declarations
 const cachedRecords = {};
+const MAX_DB_REQUESTS_PER_SECOND = 5; // TODO: Consider renaming verbose variable
+
+var timeSinceLastDbRequest = 0; // In ms
+
+// Increment timeSinceLastDbRequest every ms
+setInterval(() => {
+    timeSinceLastDbRequest++;
+}, 1);
+
+//! Untested method
+function performDbRequestLogic(method, reject) { // TODO: Consider changing poor method name
+    try {
+        // Check if we are sending requests too fast
+        let timeoutTime = 0;
+        if(timeSinceLastDbRequest < (1 / MAX_DB_REQUESTS_PER_SECOND) * 1000) {
+            // Request was sent too fast. Wait some time before sending a new one
+            // TODO: Add buffer time and add log
+            timeoutTime = 1 / MAX_DB_REQUESTS_PER_SECOND - timeSinceLastDbRequest;
+        }
+
+        setTimeout(method, timeoutTime);
+
+        // Reset timeSinceLastDbRequest
+        timeSinceLastDbRequest = 0;
+
+    } catch(error) {
+        logger.error(`Error occurred while performing database request logic ${error}`);
+        logger.trace();
+        reject(error);
+    }
+}
 
 const methods = {
     // Returns an array of records in the specified table and updates record cache
     cacheRecords: function(tableName) {
-        logger.info(`Caching records for "${tableName}"`)
+        logger.info(`Caching records for "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
-                let updatedRecords = [];
+                performDbRequestLogic(() => {
+                    let updatedRecords = [];
 
-                // Select the desired table and loop through records
-                airtableBase(tableName).select({
-                    view: 'Grid view'
-                }).eachPage((records, fetchNextPage) => {
+                    // Select the desired table and loop through records
+                    airtableBase(tableName).select({
+                        view: 'Grid view'
+                    }).eachPage((records, fetchNextPage) => {
 
-                    records.forEach((record) => {
-                        updatedRecords.push(record);
+                        records.forEach((record) => {
+                            updatedRecords.push(record);
+                        });
+                        fetchNextPage();
+                    }).then(() => {
+                        // Update the cache
+                        cachedRecords[tableName] = updatedRecords;
+                        resolve(updatedRecords);
                     });
-                    fetchNextPage();
-                }).then(() => {
+                }, reject);
 
-                    // Update the cache
-                    cachedRecords[tableName] = updatedRecords;
-                    resolve(updatedRecords);
-                });
             } catch(error) {
-                logger.error(`Could not update record for table "${tableName}"\n` +
-                    `${error}`);
+                logger.error(`Could not update record for table "${tableName}"\n${error}`);
                 logger.trace();
                 reject(error);
             }
@@ -51,38 +84,40 @@ const methods = {
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
-                let searchResults = [];
+                performDbRequestLogic(() => {
+                    let searchResults = [];
 
-                // Check if table has been cached
-                if(cachedRecords[tableName] !== undefined) {
+                    // Check if table has been cached
+                    if(cachedRecords[tableName] !== undefined) {
 
-                    // Loop through records in table
-                    cachedRecords[tableName].forEach(record => {
-                        // Find records that match the search query
-                        //? Consider changing the search query later
-                        if(isExact) {
-                            if(record['fields'][fieldName] === fieldValue) {
-                                searchResults.push(record);
-                            }
-                        } else {
-                            if(typeof record['fields'][fieldName] === 'string') {
-                                if(record[fieldName].contains(fieldValue)) {
+                        // Loop through records in table
+                        cachedRecords[tableName].forEach(record => {
+                            // Find records that match the search query
+                            //? Consider changing the search query later
+                            if(isExact) {
+                                if(record['fields'][fieldName] === fieldValue) {
                                     searchResults.push(record);
                                 }
-                            } else if(record['fields'][fieldName] === fieldValue) {
-                                searchResults.push(record);
+                            } else {
+                                if(typeof record['fields'][fieldName] === 'string') {
+                                    if(record[fieldName].contains(fieldValue)) {
+                                        searchResults.push(record);
+                                    }
+                                } else if(record['fields'][fieldName] === fieldValue) {
+                                    searchResults.push(record);
+                                }
                             }
-                        }
-                    });
-                } else {
-                    logger.warn('Trying to search in a table that is not cached (and may not exist)');
-                }
+                        });
+                    } else {
+                        logger.warn('Trying to search in a table that is not cached (and may not exist)');
+                    }
 
-                resolve(searchResults);
+                    resolve(searchResults);
+                }, reject);
+
             } catch(error) {
                 logger.error(`Could not search for record by field value\n` +
-                    `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"\n` +
-                    `${error}`);
+                    `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"\n${error}`);
                 logger.trace();
                 reject(error);
             }
@@ -94,13 +129,16 @@ const methods = {
         logger.info(`Adding record to "${tableName}"`)
         return new Promise((resolve, reject) => {
             try {
-                airtableBase(tableName).create(records, {typecast: true}).then((addedRecords) => {
-                    resolve(addedRecords);
-                }).catch((error) => {
-                    logger.error(`Could not add record to "${tableName}"\n${error}`);
-                    logger.trace();
-                    reject(error);
-                });
+                performDbRequestLogic(() => {
+                    airtableBase(tableName).create(records, {typecast: true}).then((addedRecords) => {
+                        resolve(addedRecords);
+                    }).catch((error) => {
+                        logger.error(`Could not add record to "${tableName}"\n${error}`);
+                        logger.trace();
+                        reject(error);
+                    });
+                }, reject);
+
             } catch(error) {
                 logger.error(`Could not add record to "${tableName}"\n${error}`);
                 logger.trace();
@@ -114,13 +152,16 @@ const methods = {
         logger.info(`Deleting record(s) from "${tableName}" with ID(s) "${recordIDs}"`);
         return new Promise((resolve, reject) => {
             try {
-                airtableBase(tableName).destroy(recordIDs).then((deletedRecords) => {
-                    resolve(deletedRecords);
-                }).catch((error) => {
-                    logger.error(`Could not delete record(s) from "${tableName}" with ID(s) "${recordIDs}"\n${error}`);
-                    logger.trace();
-                    reject(error);
-                });
+                performDbRequestLogic(() => {
+                    airtableBase(tableName).destroy(recordIDs).then((deletedRecords) => {
+                        resolve(deletedRecords);
+                    }).catch((error) => {
+                        logger.error(`Could not delete record(s) from "${tableName}" with ID(s) "${recordIDs}"\n${error}`);
+                        logger.trace();
+                        reject(error);
+                    });
+                }, reject);
+
             } catch(error) {
                 logger.error(`Could not delete record(s) from "${tableName}" with ID(s) "${recordIDs}"\n${error}`);
                 logger.trace();
