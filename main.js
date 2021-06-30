@@ -51,9 +51,9 @@ app.put('/cache-records', jsonParser, async(req, res) => {
     logger.info('Request on /cache-records was made');
 
     try {
-        const tableName = req.body["Table Name"];
+        const tableName = req.body['Table Name'];
 
-        if (tableName === undefined) {
+        if(tableName === undefined) {
             logger.warn('Response status set to 400');
             res.status(statusCodes.BAD_REQUEST).end();
         }

@@ -22,30 +22,7 @@ setInterval(() => {
     timeSinceLastDbRequest++;
 }, 1);
 
-// Prevents database requests occurring too often
-//! All database requests should be handled through this
-//! Untested method
-function handleDbRequest(method, reject) {
-    try {
-        // Check if we are sending requests too fast
-        let timeoutTime = 0;
-        if(timeSinceLastDbRequest < (1 / MAX_DB_REQUESTS_PER_SECOND) * 1000) {
-            // Request was sent too fast. Wait some time before sending a new one
-            logger.info('Deferring database request to prevent overload');
-            timeoutTime = 1 / MAX_DB_REQUESTS_PER_SECOND - timeSinceLastDbRequest;
-        }
-
-        setTimeout(method, timeoutTime);
-
-        // Reset timeSinceLastDbRequest
-        timeSinceLastDbRequest = 0;
-
-    } catch(error) {
-        logger.error(`Error occurred while performing database request logic ${error}`);
-        logger.trace();
-        reject(error);
-    }
-}
+// -- PRIVATE METHODS -- //
 
 const methods = {
     // Returns an array of records in the specified table and updates record cache
@@ -175,3 +152,30 @@ const methods = {
 
 // Allow other files to use methods from this file
 module.exports = methods;
+
+// -- PUBLIC METHODS --//
+
+// Prevents database requests occurring too often
+//! All database requests should be handled through this
+//! Untested method
+function handleDbRequest(method, reject) {
+    try {
+        // Check if we are sending requests too fast
+        let timeoutTime = 0;
+        if(timeSinceLastDbRequest < (1 / MAX_DB_REQUESTS_PER_SECOND) * 1000) {
+            // Request was sent too fast. Wait some time before sending a new one
+            logger.info('Deferring database request to prevent overload');
+            timeoutTime = 1 / MAX_DB_REQUESTS_PER_SECOND - timeSinceLastDbRequest;
+        }
+
+        setTimeout(method, timeoutTime);
+
+        // Reset timeSinceLastDbRequest
+        timeSinceLastDbRequest = 0;
+
+    } catch(error) {
+        logger.error(`Error occurred while performing database request logic ${error}`);
+        logger.trace();
+        reject(error);
+    }
+}
