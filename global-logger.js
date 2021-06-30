@@ -11,7 +11,7 @@ let writeFileTimerIsActive; //? A bit verbose, consider renaming
 const consoleHandler = Logger.createDefaultHandler();
 
 // Initialization
-Logger.setLevel(Logger.DEBUG);
+Logger.setLevel(Logger.TRACE);
 Logger.setHandler((messages, context) => {
     let messageBundle = { messages: messages, context: context };
 
@@ -86,7 +86,7 @@ const methods = {
     },
     trace: function() {
         const stackTrace = new Error().stack;
-        Logger.trace(`Stack trace:\n${stackTrace}`);
+        Logger.trace(stackTrace);
     }
 };
 
