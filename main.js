@@ -60,7 +60,7 @@ app.put('/cache-records', jsonParser, async(req, res) => {
 
         airtableInterface.cacheRecords(tableName).then((records) => {
             logger.info(`Sending response`);
-            res.status(statusCodes.OK).send(records);
+            res.status(statusCodes.OK).json(records);
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
@@ -86,7 +86,7 @@ app.get('/search-records', jsonParser, async(req, res) => {
 
         airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
             logger.info(`Sending response`);
-            res.status(statusCodes.OK).send(records);
+            res.status(statusCodes.OK).json(records);
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
@@ -104,7 +104,7 @@ app.post('/add-record', jsonParser, async(req, res) => {
        const newRecords = req.body['New Records'];
 
        airtableInterface.addRecords(tableName, newRecords).then((records) => {
-           res.status(statusCodes.CREATED).send(records);
+           res.status(statusCodes.CREATED).json(records);
        }).catch((error) => {
            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
        });
@@ -115,14 +115,15 @@ app.post('/add-record', jsonParser, async(req, res) => {
 
 // Deletes record(s) from the given table
 app.delete('/delete-record', jsonParser, async(req, res) => {
-    logger.info('Rest on /delete-record was made');
+    logger.info('Request on /delete-record was made');
 
     try {
         const tableName = req.body['Table Name'];
         const recordIDs = req.body['Record IDs'];
 
         airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
-            res.status(statusCodes.OK).send(deletedRecords);
+            logger.info('Sending response');
+            res.status(statusCodes.OK).json(deletedRecords);
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
