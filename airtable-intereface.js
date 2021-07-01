@@ -60,41 +60,38 @@ const methods = {
 
     // Returns an array of records by field value in specified table
     searchInField: function(tableName, fieldName, fieldValue, isExact) {
-        logger.info(`Searching for record by field value.` +
+        logger.info(`Searching for record by field value. ` +
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
-                // TODO: Remove DB request handler from here since there is not request made
-                handleDbRequest(() => {
-                    let searchResults = [];
+                let searchResults = [];
 
-                    // Check if table has been cached
-                    if(cachedRecords[tableName] !== undefined) {
+                // Check if table has been cached
+                if(cachedRecords[tableName] !== undefined) {
 
-                        // Loop through records in table
-                        cachedRecords[tableName].forEach(record => {
-                            // Find records that match the search query
-                            //? Consider changing the search query later
-                            if(isExact) {
-                                if(record['fields'][fieldName] === fieldValue) {
-                                    searchResults.push(record);
-                                }
-                            } else {
-                                if(typeof record['fields'][fieldName] === 'string') {
-                                    if(record[fieldName].contains(fieldValue)) {
-                                        searchResults.push(record);
-                                    }
-                                } else if(record['fields'][fieldName] === fieldValue) {
-                                    searchResults.push(record);
-                                }
+                    // Loop through records in table
+                    cachedRecords[tableName].forEach(record => {
+                        // Find records that match the search query
+                        //? Consider changing the search query later
+                        if(isExact) {
+                            if(record['fields'][fieldName] === fieldValue) {
+                                searchResults.push(record);
                             }
-                        });
-                    } else {
-                        logger.warn('Trying to search in a table that is not cached (and may not exist)');
-                    }
+                        } else {
+                            if(typeof record['fields'][fieldName] === 'string') {
+                                if(record[fieldName].contains(fieldValue)) {
+                                    searchResults.push(record);
+                                }
+                            } else if(record['fields'][fieldName] === fieldValue) {
+                                searchResults.push(record);
+                            }
+                        }
+                    });
+                } else {
+                    logger.warn('Trying to search in a table that is not cached (and may not exist)');
+                }
 
-                    resolve(searchResults);
-                }, reject);
+                resolve(searchResults);
 
             } catch(error) {
                 logger.error(`Could not search for record by field value\n` +
