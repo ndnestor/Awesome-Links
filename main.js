@@ -20,7 +20,7 @@ const statusCodes = {
     // Server errors
     INTERNAL_SERVER_ERROR: 500
 };
-const PORT = 3000;
+const PORT = 8080;
 
 
 // -- SERVER SETUP -- //
