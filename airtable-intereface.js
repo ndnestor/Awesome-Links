@@ -23,7 +23,7 @@ setInterval(() => {
 }, 1);
 
 
-// -- PRIVATE METHODS -- //
+// -- PUBLIC METHODS -- //
 
 const methods = {
     // Returns an array of records in the specified table and updates record cache
@@ -60,10 +60,11 @@ const methods = {
 
     // Returns an array of records by field value in specified table
     searchInField: function(tableName, fieldName, fieldValue, isExact) {
-        logger.info(`Searching for record by field value\n` +
+        logger.info(`Searching for record by field value.` +
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
+                // TODO: Remove DB request handler from here since there is not request made
                 handleDbRequest(() => {
                     let searchResults = [];
 
@@ -155,7 +156,7 @@ const methods = {
 module.exports = methods;
 
 
-// -- PUBLIC METHODS --//
+// -- PRIVATE METHODS --//
 
 // Prevents database requests occurring too often
 //! All database requests should be handled through this
