@@ -4,6 +4,7 @@ const BodyParser = require('body-parser');
 
 // Script imports
 const airtableInterface = require('./airtable-intereface.js');
+const mapper = require('./mapper.js');
 const logger = require('./global-logger.js');
 
 // Other variable declarations
