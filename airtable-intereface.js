@@ -174,7 +174,7 @@ function handleDbRequest(method, reject) {
         timeSinceLastDbRequest = 0;
 
     } catch(error) {
-        logger.error(`Error occurred while performing database request logic ${error}`);
+        logger.error(`Error occurred while performing database request logic\n${error}`);
         logger.trace();
         reject(error);
     }
