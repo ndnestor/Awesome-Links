@@ -1,9 +1,11 @@
 // Module imports
 const https = require('https');
+const FS = require('fs');
 
 // Script imports
 const logger = require('./global-logger.js');
 
+// TODO: Add comments to this file
 const methods = {
     getStaticMap: function(locations) {
         logger.info('Getting static map');
@@ -18,15 +20,19 @@ const methods = {
                 https.get(mapUrl, (res) => {
                     logger.info(`Static map response has status code "${res.statusCode}"`);
 
-                    let mapImage = ''
-
-                    res.on('data', (dataChunk) => {
-                        mapImage += dataChunk;
+                    const savePath = `${__dirname}/public/map.png`; // TODO: Move outside of method
+                    const imageWriteStream = FS.createWriteStream(savePath);
+                    res.pipe(imageWriteStream);
+                    imageWriteStream.on('finish', () => {
+                        imageWriteStream.close();
+                        logger.info('Downloaded map image');
+                    }).on('error', (error) => {
+                        logger.error(`Could not get static map due to error\n${error}`);
+                        logger.trace();
+                        reject(error);
                     });
 
-                    res.on('end', () => {
-                        resolve(mapImage);
-                    });
+                    resolve();
 
                 }).on('error', (error) => {
                     logger.error(`Could not get static map due to error\n${error}`);
