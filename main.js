@@ -138,14 +138,13 @@ app.delete('/delete-record', jsonParser, async(req, res) => {
     }
 });
 
-app.get('/map', async(req, res) => {
+app.get('/map', async(req, res) => { // TODO: Change HTTP request method
     logger.info('Request on /map was made');
 
     try {
-        mapper.getStaticMap().then((image) => {
+        mapper.getStaticMap().then(() => {
             logger.info('Sending response');
-            res.set({'Content-Type': 'image/png'});
-            res.send(image);
+            res.status(statusCodes.CREATED).end();
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
@@ -153,6 +152,17 @@ app.get('/map', async(req, res) => {
         endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
     }
 });
+
+app.get('/public/:resource', async(req, res) => { // TODO: Add try-catch
+    logger.info('Request on /public/:resource was made');
+    
+    const resource = req.params.resource;
+    logger.info(`Sending resource "${resource}"`);
+
+    // TODO: Determine if path exists before sending response
+
+    res.status(statusCodes.OK).sendFile(Path.join(__dirname, `public/${resource}`));
+})
 
 // Logs that an error occurred with stack trace and then sends error http response
 function endWithError(res, statusCode, error) {
