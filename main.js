@@ -1,6 +1,7 @@
 // Module imports
 const Express = require('express');
 const BodyParser = require('body-parser');
+const Path = require('path');
 
 // Script imports
 const airtableInterface = require('./airtable-intereface.js');
@@ -40,11 +41,15 @@ app.listen(PORT, () => {
 
 // -- REQUEST HANDLING -- //
 
-// Test endpoint to see if the server is running
-// May be changed to serve a different function later
+// Sends the root html file
 app.all('/', async(req, res) => {
-    logger.info("Request on root was made");
-    res.status(statusCodes.OK).send("The server is running");
+    logger.info('Request on root was made');
+    try {
+        logger.info('Sending response');
+        res.status(statusCodes.OK).sendFile(Path.join(__dirname, '/html/index.html'));
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
 });
 
 // Updates the record cache
