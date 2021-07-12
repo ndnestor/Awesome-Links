@@ -1,6 +1,5 @@
 // Module imports
 const Express = require('express');
-const BodyParser = require('body-parser');
 const Path = require('path');
 
 // Script imports
@@ -10,7 +9,6 @@ const logger = require('./global-logger.js');
 
 // Other variable declarations
 const app = Express();
-const jsonParser = BodyParser.json();
 const statusCodes = {
     // Success responses
     OK: 200,
@@ -26,6 +24,10 @@ const PORT = 8080;
 
 
 // -- SERVER SETUP -- //
+// Allow Express to parse JSON
+app.use(Express.urlencoded({extended: true}));
+app.use(Express.json());
+
 
 // Cache part of database
 airtableInterface.cacheRecords('Employees').catch((error) => {
@@ -53,7 +55,7 @@ app.all('/', async(req, res) => {
 });
 
 // Updates the record cache
-app.put('/cache-records', jsonParser, async(req, res) => {
+app.put('/cache-records', async(req, res) => {
     logger.info('Request on /cache-records was made');
 
     try {
@@ -76,7 +78,7 @@ app.put('/cache-records', jsonParser, async(req, res) => {
 });
 
 // Searches for records in a table with a given (reliant on the record cache being up to date)
-app.get('/search-records', jsonParser, async(req, res) => {
+app.get('/search-records', async(req, res) => {
     logger.info('Request on /search-records was made');
 
     try {
@@ -102,7 +104,7 @@ app.get('/search-records', jsonParser, async(req, res) => {
 });
 
 // Adds record(s) to the given table
-app.post('/add-record', jsonParser, async(req, res) => {
+app.post('/add-record', async(req, res) => {
    logger.info('Request on /add-record was made');
 
    try {
@@ -120,7 +122,7 @@ app.post('/add-record', jsonParser, async(req, res) => {
 });
 
 // Deletes record(s) from the given table
-app.delete('/delete-record', jsonParser, async(req, res) => {
+app.delete('/delete-record', async(req, res) => {
     logger.info('Request on /delete-record was made');
 
     try {
