@@ -2,7 +2,7 @@
 /shelf/
 /workspace.xml
 # Editor-based HTTP Client requests
-/httpRequests/
+/.idea/httpRequests/
 
 # User added ignored files
 /node_modules
