@@ -145,7 +145,7 @@ app.put('/update-map', async(req, res) => {
     logger.info('Request on /update-map was made');
 
     try {
-        mapper.getStaticMap().then(() => {
+        mapper.saveStaticMap().then(() => {
             logger.info('Sending response');
             res.status(statusCodes.CREATED).end();
         }).catch((error) => {
