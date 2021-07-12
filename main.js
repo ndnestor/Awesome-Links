@@ -34,7 +34,7 @@ airtableInterface.cacheRecords('Employees').catch((error) => {
 
 // Allow connections to the server
 app.listen(PORT, () => {
-    logger.info(`The server is listening on port ${PORT}`);
+    logger.info(`The server is listening on port "${PORT}"`);
 });
 
 
@@ -133,7 +133,25 @@ app.delete('/delete-record', jsonParser, async(req, res) => {
     }
 });
 
+app.get('/map', async(req, res) => {
+    logger.info('Request on /map was made');
+
+    try {
+        mapper.getStaticMap().then((image) => {
+            logger.info('Sending response');
+            res.set({'Content-Type': 'image/png'});
+            res.send(image);
+        }).catch((error) => {
+            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        });
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
+});
+
+// Logs that an error occurred with stack trace and then sends error http response
 function endWithError(res, statusCode, error) {
+    // TODO: Try-catch this
     logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
     logger.trace();
     res.status(statusCode).end();
