@@ -1,6 +1,7 @@
 // Module imports
 const Express = require('express');
 const Path = require('path');
+const FS = require('fs');
 
 // Script imports
 const airtableInterface = require('./airtable-intereface.js');
@@ -140,8 +141,8 @@ app.delete('/delete-record', async(req, res) => {
     }
 });
 
-app.get('/map', async(req, res) => { // TODO: Change HTTP request method
-    logger.info('Request on /map was made');
+app.put('/update-map', async(req, res) => {
+    logger.info('Request on /update-map was made');
 
     try {
         mapper.getStaticMap().then(() => {
@@ -155,21 +156,33 @@ app.get('/map', async(req, res) => { // TODO: Change HTTP request method
     }
 });
 
-app.get('/public/:resource', async(req, res) => { // TODO: Add try-catch
+app.get('/public/:resource', async(req, res) => {
     logger.info('Request on /public/:resource was made');
     
-    const resource = req.params.resource;
-    logger.info(`Sending resource "${resource}"`);
+    try {
+        const resource = req.params.resource;
+        
+        const pathToResource = Path.join(__dirname, `public/${resource}`);
 
-    // TODO: Determine if path exists before sending response
+        if(FS.existsSync(pathToResource)) {
+            logger.info(`Sending resource "${resource}"`);
+            res.status(statusCodes.OK).sendFile(Path.join(__dirname, `public/${resource}`));
+        } else {
+            logger.warn(`Response status set to 400. Path "${pathToResource}" does not exist`);
+            res.status(statusCodes.BAD_REQUEST).end();
+        }
+    
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
 
-    res.status(statusCodes.OK).sendFile(Path.join(__dirname, `public/${resource}`));
 })
 
 // Logs that an error occurred with stack trace and then sends error http response
 function endWithError(res, statusCode, error) {
-    // TODO: Try-catch this
     logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
     logger.trace();
     res.status(statusCode).end();
 }
+
+// TODO: Create "endNormally" method to reduce repeated code
