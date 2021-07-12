@@ -9,5 +9,6 @@
 /Object Planning.drawio
 /package-lock.json
 /logs/
+/public/
 *.http
 *.rest
