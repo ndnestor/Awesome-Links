@@ -85,6 +85,7 @@ const methods = {
         Logger.error(message.toString());
     },
     trace: function() {
+        // TODO: Fix trace formatting
         const stackTrace = new Error().stack;
         Logger.trace(stackTrace);
     }

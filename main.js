@@ -1,9 +1,11 @@
 // Module imports
 const Express = require('express');
 const BodyParser = require('body-parser');
+const Path = require('path');
 
 // Script imports
 const airtableInterface = require('./airtable-intereface.js');
+const mapper = require('./mapper.js');
 const logger = require('./global-logger.js');
 
 // Other variable declarations
@@ -33,17 +35,21 @@ airtableInterface.cacheRecords('Employees').catch((error) => {
 
 // Allow connections to the server
 app.listen(PORT, () => {
-    logger.info(`The server is listening on port ${PORT}`);
+    logger.info(`The server is listening on port "${PORT}"`);
 });
 
 
 // -- REQUEST HANDLING -- //
 
-// Test endpoint to see if the server is running
-// May be changed to serve a different function later
+// Sends the root html file
 app.all('/', async(req, res) => {
-    logger.info("Request on root was made");
-    res.status(statusCodes.OK).send("The server is running");
+    logger.info('Request on root was made');
+    try {
+        logger.info('Sending response');
+        res.status(statusCodes.OK).sendFile(Path.join(__dirname, '/html/index.html'));
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
 });
 
 // Updates the record cache
@@ -132,7 +138,25 @@ app.delete('/delete-record', jsonParser, async(req, res) => {
     }
 });
 
+app.get('/map', async(req, res) => {
+    logger.info('Request on /map was made');
+
+    try {
+        mapper.getStaticMap().then((image) => {
+            logger.info('Sending response');
+            res.set({'Content-Type': 'image/png'});
+            res.send(image);
+        }).catch((error) => {
+            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        });
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
+});
+
+// Logs that an error occurred with stack trace and then sends error http response
 function endWithError(res, statusCode, error) {
+    // TODO: Try-catch this
     logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
     logger.trace();
     res.status(statusCode).end();

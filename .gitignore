@@ -2,10 +2,12 @@
 /shelf/
 /workspace.xml
 # Editor-based HTTP Client requests
-/httpRequests/
+/.idea/httpRequests/
 
 # User added ignored files
 /node_modules
 /Object Planning.drawio
 /package-lock.json
 /logs/
+*.http
+*.rest
