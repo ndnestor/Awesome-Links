@@ -1,7 +1,7 @@
 // Module imports
 const Express = require('express');
-const BodyParser = require('body-parser');
 const Path = require('path');
+const FS = require('fs');
 
 // Script imports
 const airtableInterface = require('./airtable-intereface.js');
@@ -10,7 +10,6 @@ const logger = require('./global-logger.js');
 
 // Other variable declarations
 const app = Express();
-const jsonParser = BodyParser.json();
 const statusCodes = {
     // Success responses
     OK: 200,
@@ -26,6 +25,10 @@ const PORT = 8080;
 
 
 // -- SERVER SETUP -- //
+// Allow Express to parse JSON
+app.use(Express.urlencoded({extended: true}));
+app.use(Express.json());
+
 
 // Cache part of database
 airtableInterface.cacheRecords('Employees').catch((error) => {
@@ -53,7 +56,7 @@ app.all('/', async(req, res) => {
 });
 
 // Updates the record cache
-app.put('/cache-records', jsonParser, async(req, res) => {
+app.put('/cache-records', async(req, res) => {
     logger.info('Request on /cache-records was made');
 
     try {
@@ -76,7 +79,7 @@ app.put('/cache-records', jsonParser, async(req, res) => {
 });
 
 // Searches for records in a table with a given (reliant on the record cache being up to date)
-app.get('/search-records', jsonParser, async(req, res) => {
+app.get('/search-records', async(req, res) => {
     logger.info('Request on /search-records was made');
 
     try {
@@ -102,7 +105,7 @@ app.get('/search-records', jsonParser, async(req, res) => {
 });
 
 // Adds record(s) to the given table
-app.post('/add-record', jsonParser, async(req, res) => {
+app.post('/add-record', async(req, res) => {
    logger.info('Request on /add-record was made');
 
    try {
@@ -120,7 +123,7 @@ app.post('/add-record', jsonParser, async(req, res) => {
 });
 
 // Deletes record(s) from the given table
-app.delete('/delete-record', jsonParser, async(req, res) => {
+app.delete('/delete-record', async(req, res) => {
     logger.info('Request on /delete-record was made');
 
     try {
@@ -138,14 +141,14 @@ app.delete('/delete-record', jsonParser, async(req, res) => {
     }
 });
 
-app.get('/map', async(req, res) => {
-    logger.info('Request on /map was made');
+// TODO: Replace with PUT
+app.get('/update-map', async(req, res) => {
+    logger.info('Request on /update-map was made');
 
     try {
-        mapper.getStaticMap().then((image) => {
+        mapper.saveStaticMap().then(() => {
             logger.info('Sending response');
-            res.set({'Content-Type': 'image/png'});
-            res.send(image);
+            res.status(statusCodes.CREATED).end();
         }).catch((error) => {
             endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
         });
@@ -154,10 +157,62 @@ app.get('/map', async(req, res) => {
     }
 });
 
+app.get('/public/:resource', async(req, res) => {
+    logger.info('Request on /public/:resource was made');
+    
+    try {
+        const resource = req.params.resource;
+        
+        const pathToResource = Path.join(__dirname, `public/${resource}`);
+
+        if(FS.existsSync(pathToResource)) {
+            logger.info(`Sending resource "${resource}"`);
+            res.status(statusCodes.OK).sendFile(Path.join(__dirname, `public/${resource}`));
+        } else {
+            logger.warn(`Response status set to 400. Path "${pathToResource}" does not exist`);
+            res.status(statusCodes.BAD_REQUEST).end();
+        }
+    
+    } catch(error) {
+        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+    }
+
+})
+
 // Logs that an error occurred with stack trace and then sends error http response
+//! This method is deprecated
+// TODO: Replace with simple end() method for all response end use cases
 function endWithError(res, statusCode, error) {
-    // TODO: Try-catch this
     logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
     logger.trace();
     res.status(statusCode).end();
 }
+
+// TODO: Flesh out method to handle sending JSON and other types of content
+//! Not yet implemented
+function endResponse(res, statusCode, error=undefined) {
+    let logMessageToSend = '';
+    logMessageToSend += `Ending response with status code ${statusCode}`;
+    switch(statusCode.toString()[0]) {
+        case '2':
+            // 200s - success status codes
+            logMessageToSend += '. This is a success code';
+            logger.info(logMessageToSend);
+            break;
+        case '4':
+            // 400s - client error status codes
+            logMessageToSend += '. This is a client error code';
+            logger.warn(logMessageToSend);
+            break;
+        case '5':
+            // 500s - server error status codes
+            logMessageToSend += '. This is a server error code';
+            logger.error(logMessageToSend);
+            break;
+        default:
+            logMessageToSend += '. This status code family is not set up properly for logging';
+            logger.warn(logMessageToSend);
+    }
+    res.statusCode(statusCode).end();
+}
+
