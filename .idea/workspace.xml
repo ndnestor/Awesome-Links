@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="619e3b2d-16f7-457c-9f0a-309918cf7cd3" name="Default Changelist" comment="Added mapper.js and wrote basic getStaticMap method" />
+    <list default="true" id="619e3b2d-16f7-457c-9f0a-309918cf7cd3" name="Default Changelist" comment="Implemented dynamic location plotting functionality">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mapper.js" beforeDir="false" afterPath="$PROJECT_DIR$/mapper.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -105,6 +109,8 @@
       <workItem from="1625677552211" duration="3790000" />
       <workItem from="1625758685786" duration="7379000" />
       <workItem from="1625766251913" duration="2440000" />
+      <workItem from="1626208816026" duration="73000" />
+      <workItem from="1626272635678" duration="14543000" />
     </task>
     <task id="LOCAL-00001" summary="Moved git ignore">
       <created>1624293433490</created>
@@ -365,7 +371,28 @@
       <option name="project" value="LOCAL" />
       <updated>1625771342414</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="Changed PUT request to GET request for browser testing purposes">
+      <created>1626287279953</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1626287279953</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Implemented dynamic location plotting functionality">
+      <created>1626287325962</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1626287325962</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Implemented dynamic location plotting functionality">
+      <created>1626287395010</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1626287395010</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -396,8 +423,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added log file functionality" />
-    <MESSAGE value="Added log folder to .gitignore" />
     <MESSAGE value="Added addRecords and deleteRecords methods&#10;Changed name of method updateRecords to cacheRecords" />
     <MESSAGE value="Made add/delete records tests" />
     <MESSAGE value="Retrofitted log statement" />
@@ -421,7 +446,9 @@
     <MESSAGE value="Auto-generated change" />
     <MESSAGE value="Added mapper.js import" />
     <MESSAGE value="Added mapper.js and wrote basic getStaticMap method" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added mapper.js and wrote basic getStaticMap method" />
+    <MESSAGE value="Changed PUT request to GET request for browser testing purposes" />
+    <MESSAGE value="Implemented dynamic location plotting functionality" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented dynamic location plotting functionality" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
