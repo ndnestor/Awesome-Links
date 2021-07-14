@@ -180,10 +180,39 @@ app.get('/public/:resource', async(req, res) => {
 })
 
 // Logs that an error occurred with stack trace and then sends error http response
+//! This method is deprecated
+// TODO: Replace with simple end() method for all response end use cases
 function endWithError(res, statusCode, error) {
     logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
     logger.trace();
     res.status(statusCode).end();
 }
 
-// TODO: Create "endNormally" method to reduce repeated code
+// TODO: Flesh out method to handle sending JSON and other types of content
+//! Not yet implemented
+function endResponse(res, statusCode, error=undefined) {
+    let logMessageToSend = '';
+    logMessageToSend += `Ending response with status code ${statusCode}`;
+    switch(statusCode.toString()[0]) {
+        case '2':
+            // 200s - success status codes
+            logMessageToSend += '. This is a success code';
+            logger.info(logMessageToSend);
+            break;
+        case '4':
+            // 400s - client error status codes
+            logMessageToSend += '. This is a client error code';
+            logger.warn(logMessageToSend);
+            break;
+        case '5':
+            // 500s - server error status codes
+            logMessageToSend += '. This is a server error code';
+            logger.error(logMessageToSend);
+            break;
+        default:
+            logMessageToSend += '. This status code family is not set up properly for logging';
+            logger.warn(logMessageToSend);
+    }
+    res.statusCode(statusCode).end();
+}
+
