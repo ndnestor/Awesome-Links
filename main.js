@@ -141,7 +141,8 @@ app.delete('/delete-record', async(req, res) => {
     }
 });
 
-app.put('/update-map', async(req, res) => {
+// TODO: Replace with PUT
+app.get('/update-map', async(req, res) => {
     logger.info('Request on /update-map was made');
 
     try {
