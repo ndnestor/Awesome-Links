@@ -3,12 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Awesome Links</title>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 
 <body>
 
     <h1>Hello, World!</h1>
-    <img src='http://localhost:8080/public/map.png'>
+
+    <img src='http://localhost:8080/public/employee-map.png'>
+
+    <div id='map' style='width: 400px; height: 300px;'></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuYXdlc29tZWluYyIsImEiOiJja3F0bW9jMnkyNmdoMnZtejNjMTg0czRyIn0.x6imIZ-pCiJaIOMX3SdoQg';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/nathanawesomeinc/ckqtmukm70m0417mu72g1yeee'
+        });
+    </script>
 
 </body>
 </html>
