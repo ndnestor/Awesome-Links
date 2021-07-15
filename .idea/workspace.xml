@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="619e3b2d-16f7-457c-9f0a-309918cf7cd3" name="Default Changelist" comment="Auto-generated workspace.xml changes">
+      <change beforePath="$PROJECT_DIR$/.idea/Awesome Links.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Awesome Links.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/html/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
@@ -56,7 +58,13 @@
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="JavaScript.Libraries" />
+    <property name="ts.external.directory.path" value="C:\Users\Nathan\AppData\Local\JetBrains\Toolbox\apps\WebStorm\ch-0\211.7442.26\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
     <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\OneDrive - Rutgers University\Programming\Awesome Links\public" />
+    </key>
   </component>
   <component name="RunManager" selected="Node.js.main.js">
     <configuration name="rest-api#2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/rest-api.http" index="2" runType="Run single request">
@@ -111,7 +119,7 @@
       <workItem from="1625766251913" duration="2440000" />
       <workItem from="1626208816026" duration="73000" />
       <workItem from="1626272635678" duration="14543000" />
-      <workItem from="1626357509998" duration="5898000" />
+      <workItem from="1626357509998" duration="8644000" />
     </task>
     <task id="LOCAL-00001" summary="Moved git ignore">
       <created>1624293433490</created>
@@ -393,7 +401,28 @@
       <option name="project" value="LOCAL" />
       <updated>1626287395010</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Added basic interactive map. Fixed static map link">
+      <created>1626364623568</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1626364623568</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Implemented endResponse method and removed double logging from main.js">
+      <created>1626364747192</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1626364747192</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Auto-generated workspace.xml changes">
+      <created>1626364761645</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1626364761645</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -424,9 +453,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added addRecords and deleteRecords methods&#10;Changed name of method updateRecords to cacheRecords" />
-    <MESSAGE value="Made add/delete records tests" />
-    <MESSAGE value="Retrofitted log statement" />
     <MESSAGE value="Added message prefixes to logs" />
     <MESSAGE value="Added JSON parsing and changed accepted request types" />
     <MESSAGE value="Made exactness of search-records endpoint changeable by JSON body" />
@@ -449,7 +475,10 @@
     <MESSAGE value="Added mapper.js and wrote basic getStaticMap method" />
     <MESSAGE value="Changed PUT request to GET request for browser testing purposes" />
     <MESSAGE value="Implemented dynamic location plotting functionality" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented dynamic location plotting functionality" />
+    <MESSAGE value="Added basic interactive map. Fixed static map link" />
+    <MESSAGE value="Implemented endResponse method and removed double logging from main.js" />
+    <MESSAGE value="Auto-generated workspace.xml changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Auto-generated workspace.xml changes" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
