@@ -21,6 +21,12 @@ const statusCodes = {
     // Server errors
     INTERNAL_SERVER_ERROR: 500
 };
+// TODO: Make this more specific (i.e. application/json, etc)
+const sendTypes = {
+    STRING: 1,
+    FILE: 2,
+    JSON: 3
+};
 const PORT = 8080;
 
 
@@ -48,10 +54,11 @@ app.listen(PORT, () => {
 app.all('/', async(req, res) => {
     logger.info('Request on root was made');
     try {
-        logger.info('Sending response');
-        res.status(statusCodes.OK).sendFile(Path.join(__dirname, '/html/index.html'));
+        endResponse(res, statusCodes.OK, sendTypes.FILE, Path.join(Path.join(__dirname, '/html/index.html')));
     } catch(error) {
-        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
     }
 });
 
@@ -63,18 +70,18 @@ app.put('/cache-records', async(req, res) => {
         const tableName = req.body['Table Name'];
 
         if(tableName === undefined) {
-            logger.warn('Response status set to 400');
-            res.status(statusCodes.BAD_REQUEST).end();
+            endResponse(res, statusCodes.BAD_REQUEST);
         }
 
         airtableInterface.cacheRecords(tableName).then((records) => {
-            logger.info(`Sending response`);
-            res.status(statusCodes.OK).json(records);
+            endResponse(res, statusCodes.OK, sendTypes.JSON, records);
         }).catch((error) => {
-            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
-        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
     }
 });
 
@@ -89,18 +96,18 @@ app.get('/search-records', async(req, res) => {
         const isExact = req.body['Is Exact'];
 
         if(tableName === undefined || fieldName === undefined || fieldValue === undefined || isExact === undefined) {
-            logger.warn('Response status set to 400');
-            res.status(statusCodes.BAD_REQUEST).end();
+            endResponse(res, statusCodes.BAD_REQUEST);
         }
 
         airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
-            logger.info(`Sending response`);
-            res.status(statusCodes.OK).json(records);
+            endResponse(res, statusCodes.OK, sendTypes.JSON, records);
         }).catch((error) => {
-            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
-        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
     }
 });
 
@@ -113,12 +120,14 @@ app.post('/add-record', async(req, res) => {
        const newRecords = req.body['New Records'];
 
        airtableInterface.addRecords(tableName, newRecords).then((records) => {
-           res.status(statusCodes.CREATED).json(records);
+           endResponse(res, statusCodes.CREATED, sendTypes.JSON, records);
        }).catch((error) => {
-           endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+           endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
        });
    } catch(error) {
-       endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+       logger.error(error);
+       logger.trace();
+       endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
    }
 });
 
@@ -131,13 +140,14 @@ app.delete('/delete-record', async(req, res) => {
         const recordIDs = req.body['Record IDs'];
 
         airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
-            logger.info('Sending response');
-            res.status(statusCodes.OK).json(deletedRecords);
+            endResponse(res, statusCodes.OK, statusCodes.JSON, deletedRecords);
         }).catch((error) => {
-            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
-        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
     }
 });
 
@@ -147,13 +157,14 @@ app.get('/update-map', async(req, res) => {
 
     try {
         mapper.saveStaticMap().then(() => {
-            logger.info('Sending response');
-            res.status(statusCodes.CREATED).end();
+            endResponse(res, statusCodes.CREATED);
         }).catch((error) => {
-            endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
-        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
     }
 });
 
@@ -167,52 +178,81 @@ app.get('/public/:resource', async(req, res) => {
 
         if(FS.existsSync(pathToResource)) {
             logger.info(`Sending resource "${resource}"`);
-            res.status(statusCodes.OK).sendFile(Path.join(__dirname, `public/${resource}`));
+            endResponse(res, statusCodes.OK, sendTypes.FILE, Path.join(__dirname, `public/${resource}`));
         } else {
-            logger.warn(`Response status set to 400. Path "${pathToResource}" does not exist`);
-            res.status(statusCodes.BAD_REQUEST).end();
+            logger.warn(`Path "${pathToResource}" does not exist`);
+            endResponse(res, statusCodes.BAD_REQUEST);
         }
     
     } catch(error) {
-        endWithError(res, statusCodes.INTERNAL_SERVER_ERROR, error);
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
+    }
+});
+
+// TODO: Flesh out method to handle changing content headers
+function endResponse(res, statusCode, sendType=undefined, sendContent=undefined) {
+
+    try {
+        // Send log message based on status code
+        let logMessageToSend = '';
+        logMessageToSend += `Ending response with status code ${statusCode}`;
+        switch (statusCode.toString()[0]) {
+            case '2':
+                // 200s - success status codes
+                logMessageToSend += '. This is a success code';
+                logger.info(logMessageToSend);
+                break;
+            case '4':
+                // 400s - client error status codes
+                logMessageToSend += '. This is a client error code';
+                logger.warn(logMessageToSend);
+                break;
+            case '5':
+                // 500s - server error status codes
+                logMessageToSend += '. This is a server error code';
+                logger.error(logMessageToSend);
+                break;
+            default:
+                logMessageToSend += '. This status code family is not set up properly for logging';
+                logger.warn(logMessageToSend);
+        }
+    } catch(error) {
+        logger.error(`Something went wrong with logging an HTTP response\n${error}`);
+        logger.trace();
     }
 
-})
+    try {
+        // Set status code
+        res.statusCode(statusCode);
 
-// Logs that an error occurred with stack trace and then sends error http response
-//! This method is deprecated
-// TODO: Replace with simple end() method for all response end use cases
-function endWithError(res, statusCode, error) {
-    logger.error(`Response status set to ${statusCode}. Received error\n${error}`);
-    logger.trace();
-    res.status(statusCode).end();
-}
+        // End the response appropriately
+        if (sendType === undefined) {
+            res.end();
+        } else {
+            if (sendContent === undefined) {
+                logger.error('Send type was defined but send content was not. Ending response with no send content');
+            } else if (sendType === sendTypes.FILE) {
+                res.sendFile(sendContent);
+            } else if (sendType === sendTypes.STRING) {
+                res.send(sendContent);
+            } else if (sendType === sendTypes.JSON) {
+                res.json(sendContent);
+            } else {
+                logger.error(`Specified send type does not exist. Ending response with status code 
+                ${statusCodes.INTERNAL_SERVER_ERROR} with no response content`);
+                logger.trace();
 
-// TODO: Flesh out method to handle sending JSON and other types of content
-//! Not yet implemented
-function endResponse(res, statusCode, error=undefined) {
-    let logMessageToSend = '';
-    logMessageToSend += `Ending response with status code ${statusCode}`;
-    switch(statusCode.toString()[0]) {
-        case '2':
-            // 200s - success status codes
-            logMessageToSend += '. This is a success code';
-            logger.info(logMessageToSend);
-            break;
-        case '4':
-            // 400s - client error status codes
-            logMessageToSend += '. This is a client error code';
-            logger.warn(logMessageToSend);
-            break;
-        case '5':
-            // 500s - server error status codes
-            logMessageToSend += '. This is a server error code';
-            logger.error(logMessageToSend);
-            break;
-        default:
-            logMessageToSend += '. This status code family is not set up properly for logging';
-            logger.warn(logMessageToSend);
+                res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
+            }
+        }
+    } catch(error) {
+        logger.error(`Something went wrong in response sending logic\n${error}\nEnding response with status code 
+        ${statusCodes.INTERNAL_SERVER_ERROR} with no response content`);
+        logger.trace();
+
+        res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
     }
-    res.statusCode(statusCode).end();
 }
 
