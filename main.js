@@ -225,7 +225,7 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
 
     try {
         // Set status code
-        res.statusCode(statusCode);
+        res.status(statusCode);
 
         // End the response appropriately
         if (sendType === undefined) {
@@ -252,7 +252,7 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
         ${statusCodes.INTERNAL_SERVER_ERROR} with no response content`);
         logger.trace();
 
-        res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).end();
     }
 }
 
