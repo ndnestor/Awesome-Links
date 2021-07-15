@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="619e3b2d-16f7-457c-9f0a-309918cf7cd3" name="Default Changelist" comment="Implemented dynamic location plotting functionality">
+    <list default="true" id="619e3b2d-16f7-457c-9f0a-309918cf7cd3" name="Default Changelist" comment="Auto-generated workspace.xml changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/html/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapper.js" beforeDir="false" afterPath="$PROJECT_DIR$/mapper.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,6 +111,7 @@
       <workItem from="1625766251913" duration="2440000" />
       <workItem from="1626208816026" duration="73000" />
       <workItem from="1626272635678" duration="14543000" />
+      <workItem from="1626357509998" duration="5898000" />
     </task>
     <task id="LOCAL-00001" summary="Moved git ignore">
       <created>1624293433490</created>
