@@ -4,33 +4,43 @@ const FS = require('fs');
 
 // Script imports
 const logger = require('./global-logger.js');
+const airtableInterface = require('./airtable-intereface.js');
 
 // Other variable declarations
-//! Do not share the mapbox access token TODO: Implement this
+//! Do not share the mapbox access token
+// TODO: Implement this
 const MAPBOX_TOKEN = 'pk.eyJ1IjoibmF0aGFuYXdlc29tZWluYyIsImEiOiJja3F0bW9jMnkyNmdoMnZtejNjMTg0czRyIn0.x6imIZ-pCiJaIOMX3SdoQg';
 const EMPLOYEE_MAP_IMAGE_PATH = `${__dirname}/public/employee-map.png`;
 const PIN_NAME = 'pin-l';
 const PIN_LABEL = '1';
 const PIN_COLOR = '000'; // Hexadecimal value
 
+
 // -- PUBLIC METHODS -- //
 
 const methods = {
     // Saves a static map of America with locations marked where interns are
-    // TODO: Add location functionality
     saveStaticMap: function(locations) {
         logger.info('Getting static map');
         return new Promise(async (resolve, reject) => {
             try {
-                //! Placeholder. Should be removed later
-                locations = [{country: 'United States', state: 'Kentucky', city: 'Lexington'}];
+
+                // Get locations from Airtable using the Airtable interface
+                locations = airtableInterface.getCachedRecords('Locations');
+
 
                 // Get the static map's URL
+                // TODO: Declare this in root
                 const mapStyleUrl = 'https://api.mapbox.com/styles/v1/nathanawesomeinc/ckqtmukm70m0417mu72g1yeee/static/';
 
                 let markerPath = '';
                 let getLocationCoordsPromises = [];
                 locations.forEach((location) => {
+
+                    // Remove all the extra data to simplify things
+                    location = location.fields;
+
+                    // Get location coordinates
                     getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
                         if(coords === undefined) {
                             // TODO: Possibly add the specific location in the log
@@ -57,12 +67,9 @@ const methods = {
                 }
                 logger.debug('Promises completed');
                 markerPath += '/';
-                logger.debug(markerPath);
 
-                //const markerPath = 'pin-l-1+000(-74.00712,40.71455)/';
                 const mapBoundsPath = `[-128.6095,21.4392,-60.6592,54.0095]/800x500?access_token=${MAPBOX_TOKEN}`;
                 const mapUrl = mapStyleUrl + markerPath + mapBoundsPath;
-                logger.debug(mapUrl);
 
                 // Request the static map
                 Https.get(mapUrl, (res) => {
@@ -102,6 +109,7 @@ const methods = {
 // Allow other files to use methods from this file
 module.exports = methods;
 
+
 // -- PRIVATE METHODS -- //
 
 // Get the longitude and latitude of a location
@@ -110,9 +118,9 @@ function getLocationCoords(location) {
         try {
             // TODO: Check if location is well formatted (no white spaces at the end, etc)
             // Prepare location for use in URL
-            const country = replaceAll(location.country, ' ', '+');
-            const state = replaceAll(location.state, ' ', '+');
-            const city = replaceAll(location.city, ' ', '+');
+            const country = replaceAll(location.Country, ' ', '+');
+            const state = replaceAll(location.State, ' ', '+');
+            const city = replaceAll(location.City, ' ', '+');
 
             // TODO: Shorten this line
             const LOCATION_URL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${city}+${state}+${country}.json?access_token=${MAPBOX_TOKEN}`;
@@ -144,6 +152,8 @@ function getLocationCoords(location) {
     });
 }
 
+// TODO: Add try-catch
 function replaceAll(string, searchTarget, replacement) {
+    // TODO: Fix cascading error logging when an error occurs here
     return string.split(searchTarget).join(replacement);
 }
