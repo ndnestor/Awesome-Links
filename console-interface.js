@@ -26,10 +26,10 @@ function handleConsoleCmd(command) {
     let response = `Command: "${command}"\n`;
 
     // Run the appropriate code based on the command
+    // TODO: Add a stop command so that it can exit after writing log buffer
     switch(command) {
         case 'ram':
-            const rss = memoryUsage().rss; // In bytes
-            response += `${rss} bytes or ${rss / 1000000} megabytes`;
+            response += `${memoryUsage().rss / 1000000} megabytes of physical RAM are being used`;
             break;
         default:
             response += 'Command not found';
