@@ -10,5 +10,6 @@
 /package-lock.json
 /logs/
 /public/employee-map.png
+/.vs/
 *.http
 *.rest
