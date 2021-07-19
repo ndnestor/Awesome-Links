@@ -25,7 +25,7 @@ setInterval(() => {
 
 // -- PUBLIC METHODS -- //
 
-const methods = {
+const methods = { // TODO: Switch to lambda function notation
     // Returns an array of records in the specified table and updates record cache
     cacheRecords: function(tableName) {
         logger.info(`Caching records for "${tableName}"`);
@@ -56,6 +56,12 @@ const methods = {
                 reject(error);
             }
         });
+    },
+
+    // Return an array of records in the specified table synchronously
+    // NOTE: Does not update the cache unlike cacheRecords()
+    getCachedRecords: function(tableName) {
+        return cachedRecords[tableName];
     },
 
     // Returns an array of records by field value in specified table
@@ -157,7 +163,6 @@ module.exports = methods;
 
 // Prevents database requests occurring too often
 //! All database requests should be handled through this
-//! Untested method
 function handleDbRequest(method, reject) {
     try {
         // Check if we are sending requests too fast
