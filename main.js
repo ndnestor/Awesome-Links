@@ -4,9 +4,10 @@ const Path = require('path');
 const FS = require('fs');
 
 // Script imports
+const logger = require('./global-logger.js');
 const airtableInterface = require('./airtable-intereface.js');
 const mapper = require('./mapper.js');
-const logger = require('./global-logger.js');
+require('./console-interface.js');
 
 // Other variable declarations
 const app = Express();
