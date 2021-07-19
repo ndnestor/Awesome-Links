@@ -1,4 +1,4 @@
-# Default ignored files
+# Default ignored files from Rider
 /.idea/shelf/
 /.idea/workspace.xml
 # Editor-based HTTP Client requests
@@ -9,6 +9,6 @@
 /Object Planning.drawio
 /package-lock.json
 /logs/
-/public/
+/public/employee-map.png
 *.http
 *.rest
