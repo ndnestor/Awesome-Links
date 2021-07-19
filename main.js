@@ -42,6 +42,10 @@ airtableInterface.cacheRecords('Employees').catch((error) => {
     logger.error(`Could not do initial record caching for Employees table due to error\n${error}`);
     logger.trace();
 });
+airtableInterface.cacheRecords('Locations').catch((error) => {
+    logger.error(`Could not do initial record caching for Locations table due to error\n${error}`);
+    logger.trace();
+});
 
 // Allow connections to the server
 app.listen(PORT, () => {
