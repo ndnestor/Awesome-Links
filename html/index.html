@@ -34,27 +34,19 @@
             style: 'mapbox://styles/nathanawesomeinc/ckqtmukm70m0417mu72g1yeee'
         });
 
-        const markers = {
-            type: 'FeatureCollection',
-            features: [{
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [-77.032, 38.913]
-                },
-                properties: {
-                    title: 'Mapbox',
-                    description: 'Washington, D.C.'
-                }
-            }]
-        };
+        fetch('/markers')
+            .then(markers => markers.json())
+            .then((markers) => {
+                markers.features.forEach((marker) => {
+                const markerElement = document.createElement('div');
+                markerElement.className = 'marker';
 
-        markers.features.forEach((marker) => {
-            const markerElement = document.createElement('div');
-            markerElement.className = 'marker';
-
-            new mapboxgl.Marker(markerElement).setLngLat(marker.geometry.coordinates).addTo(map);
+                new mapboxgl.Marker(markerElement).setLngLat(marker.geometry.coordinates).addTo(map);
+            });
+        }).catch((error) => {
+            console.error(error);
         });
+
     </script>
 
 </body>

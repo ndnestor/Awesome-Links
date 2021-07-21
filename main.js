@@ -4,9 +4,10 @@ const Path = require('path');
 const FS = require('fs');
 
 // Script imports
+const logger = require('./global-logger.js');
 const airtableInterface = require('./airtable-intereface.js');
 const mapper = require('./mapper.js');
-const logger = require('./global-logger.js');
+require('./console-interface.js');
 
 // Other variable declarations
 const app = Express();
@@ -21,7 +22,7 @@ const statusCodes = {
     // Server errors
     INTERNAL_SERVER_ERROR: 500
 };
-// TODO: Make this more specific (i.e. application/json, etc)
+
 const sendTypes = {
     STRING: 1,
     FILE: 2,
@@ -39,6 +40,10 @@ app.use(Express.json());
 // Cache part of database
 airtableInterface.cacheRecords('Employees').catch((error) => {
     logger.error(`Could not do initial record caching for Employees table due to error\n${error}`);
+    logger.trace();
+});
+airtableInterface.cacheRecords('Locations').catch((error) => {
+    logger.error(`Could not do initial record caching for Locations table due to error\n${error}`);
     logger.trace();
 });
 
@@ -75,7 +80,7 @@ app.put('/cache-records', async(req, res) => {
 
         airtableInterface.cacheRecords(tableName).then((records) => {
             endResponse(res, statusCodes.OK, sendTypes.JSON, records);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -101,7 +106,7 @@ app.get('/search-records', async(req, res) => {
 
         airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
             endResponse(res, statusCodes.OK, sendTypes.JSON, records);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -121,7 +126,7 @@ app.post('/add-record', async(req, res) => {
 
        airtableInterface.addRecords(tableName, newRecords).then((records) => {
            endResponse(res, statusCodes.CREATED, sendTypes.JSON, records);
-       }).catch((error) => {
+       }).catch(() => {
            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
        });
    } catch(error) {
@@ -141,7 +146,7 @@ app.delete('/delete-record', async(req, res) => {
 
         airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
             endResponse(res, statusCodes.OK, statusCodes.JSON, deletedRecords);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -151,14 +156,14 @@ app.delete('/delete-record', async(req, res) => {
     }
 });
 
-// TODO: Replace with PUT
-app.get('/update-map', async(req, res) => {
+// Updates the static map image
+app.put('/update-map', async(req, res) => {
     logger.info('Request on /update-map was made');
 
     try {
         mapper.saveStaticMap().then(() => {
             endResponse(res, statusCodes.CREATED);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -168,6 +173,24 @@ app.get('/update-map', async(req, res) => {
     }
 });
 
+// Sends Mapbox marker feature collection for use with interactive map
+app.get('/markers', async(req, res) => {
+    logger.info('Request on /markers was made');
+
+    try {
+        mapper.getMarkers().then((markers) => {
+            endResponse(res, statusCodes.OK, sendTypes.JSON, markers);
+        }).catch(() => {
+            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
+        });
+    } catch(error) {
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
+    }
+});
+
+// Sends a file given a path from the public folder
 app.get('/public/:resource', async(req, res) => {
     logger.info('Request on /public/:resource was made');
     
