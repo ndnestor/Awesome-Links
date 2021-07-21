@@ -38,5 +38,3 @@ function handleConsoleCmd(command) {
     // Log response message
     logger.info(response);
 }
-
-// TODO: Implement try-catch blocks
