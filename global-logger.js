@@ -72,16 +72,32 @@ const methods = {
     getLogger: function() {
         return Logger;
     },
-    debug: function(message) {
+    debug: (message) =>  {
+        if(message === undefined) {
+            this.warn('Tried to log a message with value "undefined"');
+            return;
+        }
         Logger.debug(message.toString());
     },
-    info: function(message) {
+    info: (message) => {
+        if(message === undefined) {
+            this.warn('Tried to log a message with value "undefined"');
+            return;
+        }
         Logger.info(message.toString());
     },
-    warn: function(message) {
+    warn: (message) => {
+        if(message === undefined) {
+            this.warn('Tried to log a message with value "undefined"');
+            return;
+        }
         Logger.warn(message.toString());
     },
-    error: function(message) {
+    error: (message) => {
+        if(message === undefined) {
+            this.warn('Tried to log a message with value "undefined"');
+            return;
+        }
         Logger.error(message.toString());
     },
     trace: function() {
