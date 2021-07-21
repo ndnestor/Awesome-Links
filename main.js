@@ -157,6 +157,7 @@ app.delete('/delete-record', async(req, res) => {
 });
 
 // TODO: Replace with PUT
+// Updates the static map image
 app.get('/update-map', async(req, res) => {
     logger.info('Request on /update-map was made');
 
@@ -173,6 +174,24 @@ app.get('/update-map', async(req, res) => {
     }
 });
 
+// Sends Mapbox marker feature collection for use with interactive map
+app.get('/markers', async(req, res) => {
+    logger.info('Request on /markers was made');
+
+    try {
+        mapper.getMarkers().then((markers) => {
+            endResponse(res, statusCodes.OK, sendTypes.JSON, markers);
+        }).catch((error) => { // TODO: Remove unused error parameters like this one
+            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
+        });
+    } catch(error) {
+        logger.error(error);
+        logger.trace();
+        endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
+    }
+});
+
+// Sends a file given a path from the public folder
 app.get('/public/:resource', async(req, res) => {
     logger.info('Request on /public/:resource was made');
     

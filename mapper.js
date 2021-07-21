@@ -20,14 +20,13 @@ const PIN_COLOR = '000'; // Hexadecimal value
 
 const methods = {
     // Saves a static map of America with locations marked where interns are
-    saveStaticMap: function(locations) {
+    saveStaticMap: function() {
         logger.info('Getting static map');
         return new Promise(async (resolve, reject) => {
             try {
 
                 // Get locations from Airtable using the Airtable interface
-                locations = airtableInterface.getCachedRecords('Locations');
-
+                const locations = airtableInterface.getCachedRecords('Locations');
 
                 // Get the static map's URL
                 // TODO: Declare this in root
@@ -99,6 +98,61 @@ const methods = {
                 });
             } catch(error) {
                 logger.error(`Could not get static map due to error\n${error}`);
+                logger.trace();
+                reject(error);
+            }
+        });
+    },
+
+    // Returns a feature collection of markers for use with an interactive Mapbox map
+    getMarkers: function() {
+        logger.info('Getting feature collection of markers');
+        return new Promise(async(resolve, reject) => {
+            try {
+                let markerList = [];
+                let getLocationCoordsPromises = [];
+
+                // Get locations from Airtable interface
+                const locations = airtableInterface.getCachedRecords('Locations');
+
+                // Loop through every location and add a marker to the marker list
+                locations.forEach((location) => {
+
+                    // Remove all the extra data to simplify things
+                    location = location.fields;
+
+                    // Add markers to marker list
+                    getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
+                        markerList.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [coords.x, coords.y]
+                            },
+                            properties: {
+                                title: 'Mapbox',
+                                description: `${location.City}, ${location.State}, ${location.Country}`
+                            }
+                        });
+                    }));
+                });
+
+                // Create the Mapbox feature collection structure
+                const markerFeatureCollection = {
+                    type: 'FeatureCollection'
+                }
+
+                // Wait for market list to be complete
+                await Promise.all(getLocationCoordsPromises);
+
+                // Complete the Mapbox feature collection structure
+                markerFeatureCollection.features = markerList;
+
+                // Send marker collection
+                resolve(markerFeatureCollection);
+
+            } catch(error) {
+                logger.error(`Could not get feature collection of markers due to error\n${error}`);
                 logger.trace();
                 reject(error);
             }
