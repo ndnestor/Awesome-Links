@@ -3,6 +3,7 @@ const Airtable = require('airtable');
 
 // Script imports
 const logger = require('./global-logger');
+const settings = require("./settings");
 
 // Set up airtable
 Airtable.configure({
@@ -13,21 +14,31 @@ const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 
 // Other variable declarations
 const cachedRecords = {};
+const tablesToCache = ['Employees', 'Locations'];
+const DB_UPDATE_INTERVAL = 10000;
 const MAX_DB_REQUESTS_PER_SECOND = 4; // Airtable can handle 5 with free version. Put 4 just to be safe
 
-var timeSinceLastDbRequest = 1 / MAX_DB_REQUESTS_PER_SECOND * 1000 + 1; // In ms
+let timeSinceLastDbRequest = 1 / MAX_DB_REQUESTS_PER_SECOND * 1000 + 1; // In ms
 
 // Increment timeSinceLastDbRequest every ms
 setInterval(() => {
     timeSinceLastDbRequest++;
 }, 1);
 
+// Update cached records every so often
+setInterval(() => {
+    tablesToCache.forEach((tableName) => {
+        // noinspection JSIgnoredPromiseFromCall
+        methods.cacheRecords(tableName);
+    });
+}, DB_UPDATE_INTERVAL);
+
 
 // -- PUBLIC METHODS -- //
 
-const methods = { // TODO: Switch to lambda function notation
+const methods = {
     // Returns an array of records in the specified table and updates record cache
-    cacheRecords: function(tableName) {
+    cacheRecords: (tableName) => {
         logger.info(`Caching records for "${tableName}"`);
         return new Promise((resolve, reject) => {
             try {
@@ -60,12 +71,12 @@ const methods = { // TODO: Switch to lambda function notation
 
     // Return an array of records in the specified table synchronously
     // NOTE: Does not update the cache unlike cacheRecords()
-    getCachedRecords: function(tableName) {
+    getCachedRecords: (tableName) => {
         return cachedRecords[tableName];
     },
 
     // Returns an array of records by field value in specified table
-    searchInField: function(tableName, fieldName, fieldValue, isExact) {
+    searchInField: (tableName, fieldName, fieldValue, isExact) => {
         logger.info(`Searching for record by field value. ` +
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
@@ -109,7 +120,7 @@ const methods = { // TODO: Switch to lambda function notation
     },
 
     // Add a record to the specified table
-    addRecords: function(tableName, records) {
+    addRecords: (tableName, records) => {
         logger.info(`Adding record to "${tableName}"`)
         return new Promise((resolve, reject) => {
             try {
@@ -132,7 +143,7 @@ const methods = { // TODO: Switch to lambda function notation
     },
 
     // Deletes a record in the specified table
-    deleteRecords: function(tableName, recordIDs) {
+    deleteRecords: (tableName, recordIDs) => {
         logger.info(`Deleting record(s) from "${tableName}" with ID(s) "${recordIDs}"`);
         return new Promise((resolve, reject) => {
             try {

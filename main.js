@@ -22,7 +22,7 @@ const statusCodes = {
     // Server errors
     INTERNAL_SERVER_ERROR: 500
 };
-// TODO: Make this more specific (i.e. application/json, etc)
+
 const sendTypes = {
     STRING: 1,
     FILE: 2,
@@ -80,7 +80,7 @@ app.put('/cache-records', async(req, res) => {
 
         airtableInterface.cacheRecords(tableName).then((records) => {
             endResponse(res, statusCodes.OK, sendTypes.JSON, records);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -106,7 +106,7 @@ app.get('/search-records', async(req, res) => {
 
         airtableInterface.searchInField(tableName, fieldName, fieldValue, isExact).then((records) => {
             endResponse(res, statusCodes.OK, sendTypes.JSON, records);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -126,7 +126,7 @@ app.post('/add-record', async(req, res) => {
 
        airtableInterface.addRecords(tableName, newRecords).then((records) => {
            endResponse(res, statusCodes.CREATED, sendTypes.JSON, records);
-       }).catch((error) => {
+       }).catch(() => {
            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
        });
    } catch(error) {
@@ -146,7 +146,7 @@ app.delete('/delete-record', async(req, res) => {
 
         airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
             endResponse(res, statusCodes.OK, statusCodes.JSON, deletedRecords);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -156,15 +156,14 @@ app.delete('/delete-record', async(req, res) => {
     }
 });
 
-// TODO: Replace with PUT
 // Updates the static map image
-app.get('/update-map', async(req, res) => {
+app.put('/update-map', async(req, res) => {
     logger.info('Request on /update-map was made');
 
     try {
         mapper.saveStaticMap().then(() => {
             endResponse(res, statusCodes.CREATED);
-        }).catch((error) => {
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {
@@ -181,7 +180,7 @@ app.get('/markers', async(req, res) => {
     try {
         mapper.getMarkers().then((markers) => {
             endResponse(res, statusCodes.OK, sendTypes.JSON, markers);
-        }).catch((error) => { // TODO: Remove unused error parameters like this one
+        }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
     } catch(error) {

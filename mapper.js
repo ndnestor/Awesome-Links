@@ -5,11 +5,10 @@ const FS = require('fs');
 // Script imports
 const logger = require('./global-logger.js');
 const airtableInterface = require('./airtable-intereface.js');
+const settings = require('./settings.js');
 
 // Other variable declarations
 //! Do not share the mapbox access token
-// TODO: Implement this
-const MAPBOX_TOKEN = 'pk.eyJ1IjoibmF0aGFuYXdlc29tZWluYyIsImEiOiJja3F0bW9jMnkyNmdoMnZtejNjMTg0czRyIn0.x6imIZ-pCiJaIOMX3SdoQg';
 const EMPLOYEE_MAP_IMAGE_PATH = `${__dirname}/public/employee-map.png`;
 const PIN_NAME = 'pin-l';
 const PIN_LABEL = '1';
@@ -29,8 +28,7 @@ const methods = {
                 const locations = airtableInterface.getCachedRecords('Locations');
 
                 // Get the static map's URL
-                // TODO: Declare this in root
-                const mapStyleUrl = 'https://api.mapbox.com/styles/v1/nathanawesomeinc/ckqtmukm70m0417mu72g1yeee/static/';
+                const mapStyleUrl = `https://api.mapbox.com/styles/v1/${settings.MAPBOX_STYLE_KEY}/static/`;
 
                 let markerPath = '';
                 let getLocationCoordsPromises = [];
@@ -42,8 +40,7 @@ const methods = {
                     // Get location coordinates
                     getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
                         if(coords === undefined) {
-                            // TODO: Possibly add the specific location in the log
-                            logger.warn('Could not mark location because coordinates could not be obtained');
+                            logger.warn(`Could not mark location "${location}" because coordinates could not be obtained`);
                         } else {
                             if(markerPath !== '') {
                                 markerPath += ',';
@@ -56,18 +53,13 @@ const methods = {
                     }));
                 });
 
-                // TODO: Determine if I need anything besides await Promise.all();
-                let checkingTime = 1000; // TODO: Make global constant?
-                while(!await Promise.all(getLocationCoordsPromises)) {
-                    logger.debug('Waiting for promises');
-                    await function () {
-                        return new Promise((resolve) => setTimeout(resolve, checkingTime))
-                    };
-                }
-                logger.debug('Promises completed');
+                // Wait for promises to resolve
+                await Promise.all(getLocationCoordsPromises);
+
+
                 markerPath += '/';
 
-                const mapBoundsPath = `[-128.6095,21.4392,-60.6592,54.0095]/800x500?access_token=${MAPBOX_TOKEN}`;
+                const mapBoundsPath = `[-128.6095,21.4392,-60.6592,54.0095]/800x500?access_token=${settings.MAPBOX_TOKEN}`;
                 const mapUrl = mapStyleUrl + markerPath + mapBoundsPath;
 
                 // Request the static map
@@ -170,14 +162,13 @@ module.exports = methods;
 function getLocationCoords(location) {
     return new Promise((resolve, reject) => {
         try {
-            // TODO: Check if location is well formatted (no white spaces at the end, etc)
             // Prepare location for use in URL
-            const country = replaceAll(location.Country, ' ', '+');
-            const state = replaceAll(location.State, ' ', '+');
-            const city = replaceAll(location.City, ' ', '+');
+            const country = replaceAll(location.Country.trim(), ' ', '+');
+            const state = replaceAll(location.State.trim(), ' ', '+');
+            const city = replaceAll(location.City.trim(), ' ', '+');
 
-            // TODO: Shorten this line
-            const LOCATION_URL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${city}+${state}+${country}.json?access_token=${MAPBOX_TOKEN}`;
+            const LOCATION_URL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${city}+${state}+${country}
+                                  .json?access_token=${settings.MAPBOX_TOKEN}`;
 
             Https.get(LOCATION_URL, (res) => {
                 logger.info(`Location geocoding response has status code "${res.statusCode}"`);
@@ -206,8 +197,13 @@ function getLocationCoords(location) {
     });
 }
 
-// TODO: Add try-catch
 function replaceAll(string, searchTarget, replacement) {
-    // TODO: Fix cascading error logging when an error occurs here
-    return string.split(searchTarget).join(replacement);
+    try {
+        // TODO: Fix cascading error logging when an error occurs here
+        return string.split(searchTarget).join(replacement);
+    } catch(error) {
+        logger.error(`Could not replace "${searchTarget}" with "${replacement}" in "${string}" due to error\n${error}`);
+        logger.trace();
+        return '';
+    }
 }
