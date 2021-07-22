@@ -38,13 +38,11 @@ app.use(Express.json());
 
 
 // Cache part of database
-airtableInterface.cacheRecords('Employees').catch((error) => {
-    logger.error(`Could not do initial record caching for Employees table due to error\n${error}`);
-    logger.trace();
+airtableInterface.cacheRecords('Employees').catch(() => {
+    logger.error(`Could not do initial record caching for Employees table`);
 });
-airtableInterface.cacheRecords('Locations').catch((error) => {
-    logger.error(`Could not do initial record caching for Locations table due to error\n${error}`);
-    logger.trace();
+airtableInterface.cacheRecords('Locations').catch(() => {
+    logger.error(`Could not do initial record caching for Locations table`);
 });
 
 // Allow connections to the server
