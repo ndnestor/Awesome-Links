@@ -18,6 +18,11 @@ Logger.setHandler((messages, context) => {
     // Beautify message
     messages[0] = messageBundleToString(messageBundle);
 
+    // Send warning if programmer tried to send multiple messages at once
+    if(messages.length > 1) {
+        methods.error('The global logger is not set up to deal with multiple log messages at once');
+    }
+
     // Send message to console
     consoleHandler(messages, context);
 
@@ -30,32 +35,31 @@ Logger.setHandler((messages, context) => {
 
 });
 
+
 // -- PRIVATE METHODS -- //
 
 // Writes the messages in writeFileBuffer to a log file
 function writeBufferToLogFile() {
 
-    try {
-        // Loop through messages and concatenate them
-        let messageToWrite = '';
-        writeFileBuffer.forEach((message) => {
-            messageToWrite += message + '\n';
-        });
+    // Loop through messages and concatenate them
+    let messageToWrite = '';
+    writeFileBuffer.forEach((message) => {
+        messageToWrite += message + '\n';
+    });
 
-        // Write message to log file
-        FS.appendFile(logFilePath, messageToWrite, {flag: 'a'}, (error) => {
-            if(error) {
-                console.error(`Failed to write log message to file with the following error:\n${error}`);
-            }
-        });
-    } catch(error) {
-        console.error(`Could not write message to log file`);
-    } finally {
+    // Write message to log file
+    // TODO: Create log folder if it doesn't exist already
+    FS.appendFile(logFilePath, messageToWrite, {flag: 'a'}, (error) => {
+        if(error) {
+            console.error(`Failed to write log message to file with error\n${error}`);
+            // TODO: Consider crashing
+        }
+    });
 
-        // Clear buffer and reset timer
-        writeFileBuffer.length = 0;
-        writeFileTimerIsActive = false;
-    }
+    // Clear buffer and reset timer
+    writeFileBuffer.length = 0;
+    writeFileTimerIsActive = false;
+
 }
 
 // Given a message and context (message bundle), returns a message that is log/console friendly
@@ -69,39 +73,34 @@ function messageBundleToString(messageBundle) {
 const methods = {
 
     // Returns the Logger object. Used to change Logger settings from outside this script
-    getLogger: function() {
+    getLogger: () => {
         return Logger;
     },
-    debug: (message) =>  {
+    debug: (message) => {
         if(message === undefined) {
-            this.warn('Tried to log a message with value "undefined"');
-            return;
+            message = 'undefined';
         }
         Logger.debug(message.toString());
     },
     info: (message) => {
         if(message === undefined) {
-            this.warn('Tried to log a message with value "undefined"');
-            return;
+            message = 'undefined';
         }
         Logger.info(message.toString());
     },
     warn: (message) => {
         if(message === undefined) {
-            this.warn('Tried to log a message with value "undefined"');
-            return;
+            message = 'undefined';
         }
         Logger.warn(message.toString());
     },
     error: (message) => {
         if(message === undefined) {
-            this.warn('Tried to log a message with value "undefined"');
-            return;
+            message = 'undefined';
         }
         Logger.error(message.toString());
     },
-    trace: function() {
-        // TODO: Fix trace formatting
+    trace: () => {
         const stackTrace = new Error().stack;
         Logger.trace(stackTrace);
     }
