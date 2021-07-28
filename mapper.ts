@@ -5,7 +5,7 @@ const Https = require('https');
 const FS = require('fs');
 
 // Script imports
-const logger = require('./global-logger.js');
+import { methods as logger } from './global-logger';
 const airtableInterface = require('./airtable-intereface.js');
 const settings = require('./settings.js');
 
