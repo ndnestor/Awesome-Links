@@ -18,6 +18,7 @@ const statusCodes = {
 
     // Client errors
     BAD_REQUEST: 400,
+    NOT_FOUND: 404,
 
     // Server errors
     INTERNAL_SERVER_ERROR: 500
@@ -57,7 +58,8 @@ app.listen(PORT, () => {
 app.all('/', async(req, res) => {
     logger.info('Request on root was made');
     try {
-        endResponse(res, statusCodes.OK, sendTypes.FILE, Path.join(Path.join(__dirname, '/html/index.html')));
+        const indexPath = Path.join(process.cwd(), '/html/index.html');
+        endResponse(res, statusCodes.OK, sendTypes.FILE, indexPath);
     } catch(error) {
         logger.error(error);
         logger.trace();
@@ -195,14 +197,14 @@ app.get('/public/:resource', async(req, res) => {
     try {
         const resource = req.params.resource;
         
-        const pathToResource = Path.join(__dirname, `public/${resource}`);
+        const pathToResource = Path.join(process.cwd(), `public/${resource}`);
 
         if(FS.existsSync(pathToResource)) {
             logger.info(`Sending resource "${resource}"`);
-            endResponse(res, statusCodes.OK, sendTypes.FILE, Path.join(__dirname, `public/${resource}`));
+            endResponse(res, statusCodes.OK, sendTypes.FILE, pathToResource);
         } else {
-            logger.warn(`Path "${pathToResource}" does not exist`);
-            endResponse(res, statusCodes.BAD_REQUEST);
+            logger.error(`Path "${pathToResource}" does not exist`);
+            endResponse(res, statusCodes.NOT_FOUND);
         }
     
     } catch(error) {
