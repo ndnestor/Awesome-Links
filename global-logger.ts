@@ -10,6 +10,7 @@ const logFilePath = `./logs/${Moment().format('YYYY-MM-DD - HH-mm-ss ZZ')} Aweso
 const writeFileInterval = 1000; // In ms
 const writeFileBuffer = [];
 let writeFileTimerIsActive; //? A bit verbose, consider renaming
+const traceLogger = Logger.get('Trace Logger');
 const consoleHandler = Logger.createDefaultHandler();
 
 // Initialization
@@ -109,6 +110,6 @@ export class methods {
 
     public static trace() {
         const stackTrace = new Error().stack;
-        Logger.trace(stackTrace);
+        traceLogger.trace(stackTrace);
     }
-};
+}

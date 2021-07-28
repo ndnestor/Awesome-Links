@@ -39,7 +39,7 @@ const methods = {
     // Returns an array of records in the specified table and updates record cache
     cacheRecords: (tableName: string): Promise<object[]> => {
         logger.debug(`Caching records for "${tableName}"`);
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             handleDbRequest(() => {
                 let updatedRecords = [];
 
@@ -155,7 +155,7 @@ function handleDbRequest(method): void {
     let timeoutTime = 0;
     if(timeSinceLastDbRequest < (1 / MAX_DB_REQUESTS_PER_SECOND) * 1000) {
         // Request was sent too fast. Wait some time before sending a new one
-        logger.info('Deferring database request to prevent overload');
+        logger.debug('Deferring database request to prevent overload');
         timeoutTime = (1 / MAX_DB_REQUESTS_PER_SECOND) * 1000 - timeSinceLastDbRequest;
     }
 
