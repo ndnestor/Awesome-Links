@@ -25,7 +25,7 @@ sudo mkdir public
 sudo mkdir $TS_BUILD_PATH
 
 # Build typescript files
-ech -e "===\nBuilding typescript files"
+echo -e "===\nBuilding typescript files"
 sudo tsc
 
 # Run the server code
