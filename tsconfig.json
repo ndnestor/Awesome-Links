@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "sourceMap": true,
+        //"outDir": "typescript-build"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

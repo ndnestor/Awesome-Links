@@ -2,7 +2,7 @@
 const Airtable = require('airtable');
 
 // Script imports
-const logger = require('./global-logger');
+import { methods as logger } from './global-logger';
 
 // Set up airtable
 Airtable.configure({
@@ -38,7 +38,7 @@ setInterval(() => {
 const methods = {
     // Returns an array of records in the specified table and updates record cache
     cacheRecords: (tableName: string): Promise<object[]> => {
-        logger.info(`Caching records for "${tableName}"`);
+        logger.debug(`Caching records for "${tableName}"`);
         return new Promise((resolve, reject) => {
             handleDbRequest(() => {
                 let updatedRecords = [];

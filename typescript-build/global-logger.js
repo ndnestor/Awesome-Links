@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.methods = void 0;
 // Module imports
 var Logger = require('js-logger');
 var Moment = require('moment');
@@ -55,43 +54,40 @@ function messageBundleToString(messageBundle) {
     return "[" + Moment().format('YYYY-MM-DD | HH:mm:ss UTCZZ') + "][" + messageBundle.context.level.name + "]: " + messageBundle.messages[0];
 }
 // -- PUBLIC METHODS --//
-var methods = /** @class */ (function () {
-    function methods() {
-    }
+var methods = {
     // Returns the Logger object. Used to change Logger settings from outside this script
-    methods.getLogger = function () {
+    getLogger: function () {
         return Logger;
-    };
-    methods.debug = function (message) {
+    },
+    debug: function (message) {
         if (message === undefined) {
             message = 'undefined';
         }
         Logger.debug(message.toString());
-    };
-    methods.info = function (message) {
+    },
+    info: function (message) {
         if (message === undefined) {
             message = 'undefined';
         }
         Logger.info(message.toString());
-    };
-    methods.warn = function (message) {
+    },
+    warn: function (message) {
         if (message === undefined) {
             message = 'undefined';
         }
         Logger.warn(message.toString());
-    };
-    methods.error = function (message) {
+    },
+    error: function (message) {
         if (message === undefined) {
             message = 'undefined';
         }
         Logger.error(message.toString());
-    };
-    methods.trace = function () {
+    },
+    trace: function () {
         var stackTrace = new Error().stack;
         Logger.trace(stackTrace);
-    };
-    return methods;
-}());
-exports.methods = methods;
-;
+    }
+};
+// Allow other files to use methods from this file
+module.exports = methods;
 //# sourceMappingURL=global-logger.js.map

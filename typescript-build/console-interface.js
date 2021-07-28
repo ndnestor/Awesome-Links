@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Module imports
 var memoryUsage = require('process').memoryUsage;
 // Script imports
-var global_logger_1 = require("./global-logger");
+var logger = require('./global-logger.js');
 // Create console listener
 var stdin = process.openStdin();
 stdin.addListener('data', function (message) {
@@ -28,6 +28,6 @@ function handleConsoleCmd(command) {
             response += 'Command not found';
     }
     // Log response message
-    global_logger_1.methods.info(response);
+    logger.info(response);
 }
 //# sourceMappingURL=console-interface.js.map

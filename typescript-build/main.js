@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,13 +34,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+var _this = this;
 // Module imports
 var Express = require('express');
 var Path = require('path');
 var FS = require('fs');
 // Script imports
-var global_logger_1 = require("./global-logger");
+var logger = require('./global-logger.js');
 var airtableInterface = require('./airtable-intereface.js');
 var mapper = require('./mapper.js');
 require('./console-interface.js');
@@ -68,36 +67,36 @@ app.use(Express.urlencoded({ extended: true }));
 app.use(Express.json());
 // Cache part of database
 airtableInterface.cacheRecords('Employees').catch(function () {
-    global_logger_1.methods.error("Could not do initial record caching for Employees table");
+    logger.error("Could not do initial record caching for Employees table");
 });
 airtableInterface.cacheRecords('Locations').catch(function () {
-    global_logger_1.methods.error("Could not do initial record caching for Locations table");
+    logger.error("Could not do initial record caching for Locations table");
 });
 // Allow connections to the server
 app.listen(PORT, function () {
-    global_logger_1.methods.info("The server is listening on port \"" + PORT + "\"");
+    logger.info("The server is listening on port \"" + PORT + "\"");
 });
 // -- REQUEST HANDLING -- //
 // Sends the root html file
-app.all('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.all('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on root was made');
+        logger.info('Request on root was made');
         try {
             endResponse(res, statusCodes.OK, sendTypes.FILE, Path.join(Path.join(__dirname, '/html/index.html')));
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Updates the record cache
-app.put('/cache-records', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.put('/cache-records', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var tableName;
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /cache-records was made');
+        logger.info('Request on /cache-records was made');
         try {
             tableName = req.body['Table Name'];
             if (tableName === undefined) {
@@ -110,18 +109,18 @@ app.put('/cache-records', function (req, res) { return __awaiter(void 0, void 0,
             });
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Searches for records in a table with a given (reliant on the record cache being up to date)
-app.get('/search-records', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.get('/search-records', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var tableName, fieldName, fieldValue, isExact;
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /search-records was made');
+        logger.info('Request on /search-records was made');
         try {
             tableName = req.body['Table Name'];
             fieldName = req.body['Field Name'];
@@ -137,18 +136,18 @@ app.get('/search-records', function (req, res) { return __awaiter(void 0, void 0
             });
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Adds record(s) to the given table
-app.post('/add-record', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/add-record', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var tableName, newRecords;
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /add-record was made');
+        logger.info('Request on /add-record was made');
         try {
             tableName = req.body['Table Name'];
             newRecords = req.body['New Records'];
@@ -159,18 +158,18 @@ app.post('/add-record', function (req, res) { return __awaiter(void 0, void 0, v
             });
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Deletes record(s) from the given table
-app.delete('/delete-record', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.delete('/delete-record', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var tableName, recordIDs;
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /delete-record was made');
+        logger.info('Request on /delete-record was made');
         try {
             tableName = req.body['Table Name'];
             recordIDs = req.body['Record IDs'];
@@ -181,17 +180,17 @@ app.delete('/delete-record', function (req, res) { return __awaiter(void 0, void
             });
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Updates the static map image
-app.put('/update-map', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.put('/update-map', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /update-map was made');
+        logger.info('Request on /update-map was made');
         try {
             mapper.saveStaticMap().then(function () {
                 endResponse(res, statusCodes.CREATED);
@@ -200,17 +199,17 @@ app.put('/update-map', function (req, res) { return __awaiter(void 0, void 0, vo
             });
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Sends Mapbox marker feature collection for use with interactive map
-app.get('/markers', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.get('/markers', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /markers was made');
+        logger.info('Request on /markers was made');
         try {
             mapper.getMarkers().then(function (markers) {
                 endResponse(res, statusCodes.OK, sendTypes.JSON, markers);
@@ -219,33 +218,33 @@ app.get('/markers', function (req, res) { return __awaiter(void 0, void 0, void 
             });
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
     });
 }); });
 // Sends a file given a path from the public folder
-app.get('/public/:resource', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.get('/public/:resource', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var resource, pathToResource;
     return __generator(this, function (_a) {
-        global_logger_1.methods.info('Request on /public/:resource was made');
+        logger.info('Request on /public/:resource was made');
         try {
             resource = req.params.resource;
             pathToResource = Path.join(__dirname, "public/" + resource);
             if (FS.existsSync(pathToResource)) {
-                global_logger_1.methods.info("Sending resource \"" + resource + "\"");
+                logger.info("Sending resource \"" + resource + "\"");
                 endResponse(res, statusCodes.OK, sendTypes.FILE, Path.join(__dirname, "public/" + resource));
             }
             else {
-                global_logger_1.methods.warn("Path \"" + pathToResource + "\" does not exist");
+                logger.warn("Path \"" + pathToResource + "\" does not exist");
                 endResponse(res, statusCodes.BAD_REQUEST);
             }
         }
         catch (error) {
-            global_logger_1.methods.error(error);
-            global_logger_1.methods.trace();
+            logger.error(error);
+            logger.trace();
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         }
         return [2 /*return*/];
@@ -263,26 +262,26 @@ function endResponse(res, statusCode, sendType, sendContent) {
             case '2':
                 // 200s - success status codes
                 logMessageToSend += '. This is a success code';
-                global_logger_1.methods.info(logMessageToSend);
+                logger.info(logMessageToSend);
                 break;
             case '4':
                 // 400s - client error status codes
                 logMessageToSend += '. This is a client error code';
-                global_logger_1.methods.warn(logMessageToSend);
+                logger.warn(logMessageToSend);
                 break;
             case '5':
                 // 500s - server error status codes
                 logMessageToSend += '. This is a server error code';
-                global_logger_1.methods.error(logMessageToSend);
+                logger.error(logMessageToSend);
                 break;
             default:
                 logMessageToSend += '. This status code family is not set up properly for logging';
-                global_logger_1.methods.warn(logMessageToSend);
+                logger.warn(logMessageToSend);
         }
     }
     catch (error) {
-        global_logger_1.methods.error("Something went wrong with logging an HTTP response\n" + error);
-        global_logger_1.methods.trace();
+        logger.error("Something went wrong with logging an HTTP response\n" + error);
+        logger.trace();
     }
     try {
         // Set status code
@@ -293,7 +292,7 @@ function endResponse(res, statusCode, sendType, sendContent) {
         }
         else {
             if (sendContent === undefined) {
-                global_logger_1.methods.error('Send type was defined but send content was not. Ending response with no send content');
+                logger.error('Send type was defined but send content was not. Ending response with no send content');
             }
             else if (sendType === sendTypes.FILE) {
                 res.sendFile(sendContent);
@@ -305,15 +304,15 @@ function endResponse(res, statusCode, sendType, sendContent) {
                 res.json(sendContent);
             }
             else {
-                global_logger_1.methods.error("Specified send type does not exist. Ending response with status code \n                " + statusCodes.INTERNAL_SERVER_ERROR + " with no response content");
-                global_logger_1.methods.trace();
+                logger.error("Specified send type does not exist. Ending response with status code \n                " + statusCodes.INTERNAL_SERVER_ERROR + " with no response content");
+                logger.trace();
                 res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
             }
         }
     }
     catch (error) {
-        global_logger_1.methods.error("Something went wrong in response sending logic\n" + error + "\nEnding response with status code \n        " + statusCodes.INTERNAL_SERVER_ERROR + " with no response content");
-        global_logger_1.methods.trace();
+        logger.error("Something went wrong in response sending logic\n" + error + "\nEnding response with status code \n        " + statusCodes.INTERNAL_SERVER_ERROR + " with no response content");
+        logger.trace();
         res.status(statusCodes.INTERNAL_SERVER_ERROR).end();
     }
 }
