@@ -11,10 +11,12 @@ const writeFileInterval = 1000; // In ms
 const writeFileBuffer = [];
 let writeFileTimerIsActive; //? A bit verbose, consider renaming
 const traceLogger = Logger.get('Trace Logger');
+const genericLogger = Logger.get('Generic');
 const consoleHandler = Logger.createDefaultHandler();
 
 // Initialization
-Logger.setLevel(Logger.TRACE);
+traceLogger.setLevel(Logger.TRACE);
+genericLogger.setLevel(Logger.INFO);
 Logger.setHandler((messages, context) => {
     let messageBundle = { messages: messages, context: context };
 
@@ -84,28 +86,28 @@ export class methods {
         if(message === undefined) {
             message = 'undefined';
         }
-        Logger.debug(message.toString());
+        genericLogger.debug(message.toString());
     }
 
     public static info(message) {
         if(message === undefined) {
             message = 'undefined';
         }
-        Logger.info(message.toString());
+        genericLogger.info(message.toString());
     }
 
     public static warn(message) {
         if(message === undefined) {
             message = 'undefined';
         }
-        Logger.warn(message.toString());
+        genericLogger.warn(message.toString());
     }
 
     public static error(message) {
         if(message === undefined) {
             message = 'undefined';
         }
-        Logger.error(message.toString());
+        genericLogger.error(message.toString());
     }
 
     public static trace() {
