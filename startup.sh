@@ -25,12 +25,12 @@ sudo mkdir public
 sudo mkdir $TS_BUILD_PATH
 
 # Build typescript files
-ech -e "===\nBuilding typescript files"
+echo -e "===\nBuilding typescript files"
 sudo tsc
 
 # Run the server code
 echo -e "===\nStarting server"
-sudo node -r source-map-support/register $ENTRY_FILE
+sudo node -r source-map-support/register $TS_BUILD_PATH$ENTRY_FILE
 
 # Print a message when server execution has ended
 echo -e "===\nProgram execution has ended"
