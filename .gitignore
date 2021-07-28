@@ -4,12 +4,21 @@
 # Editor-based HTTP Client requests
 /.idea/httpRequests/
 
-# User added ignored files
-/node_modules
-/Object Planning.drawio
-/package-lock.json
-/logs/
-/public/employee-map.png
+# Visual Studio
 /.vs/
+
+# Node.JS files
+/node_modules
+/package-lock.json
+
+# Project-generated
+/logs/
+/typescript-build/
+/public/employee-map.png
+
+# Personal files
+/Object Planning.drawio
+
+# HTTP Client
 *.http
 *.rest

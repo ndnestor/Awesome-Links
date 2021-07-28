@@ -4,7 +4,7 @@ const Path = require('path');
 const FS = require('fs');
 
 // Script imports
-const logger = require('./global-logger.js');
+import { methods as logger } from './global-logger';
 const airtableInterface = require('./airtable-intereface.js');
 const mapper = require('./mapper.js');
 require('./console-interface.js');
@@ -38,13 +38,11 @@ app.use(Express.json());
 
 
 // Cache part of database
-airtableInterface.cacheRecords('Employees').catch((error) => {
-    logger.error(`Could not do initial record caching for Employees table due to error\n${error}`);
-    logger.trace();
+airtableInterface.cacheRecords('Employees').catch(() => {
+    logger.error(`Could not do initial record caching for Employees table`);
 });
-airtableInterface.cacheRecords('Locations').catch((error) => {
-    logger.error(`Could not do initial record caching for Locations table due to error\n${error}`);
-    logger.trace();
+airtableInterface.cacheRecords('Locations').catch(() => {
+    logger.error(`Could not do initial record caching for Locations table`);
 });
 
 // Allow connections to the server
@@ -145,7 +143,7 @@ app.delete('/delete-record', async(req, res) => {
         const recordIDs = req.body['Record IDs'];
 
         airtableInterface.deleteRecords(tableName, recordIDs).then((deletedRecords) => {
-            endResponse(res, statusCodes.OK, statusCodes.JSON, deletedRecords);
+            endResponse(res, statusCodes.OK, sendTypes.JSON, deletedRecords);
         }).catch(() => {
             endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
         });
@@ -251,16 +249,16 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
         res.status(statusCode);
 
         // End the response appropriately
-        if (sendType === undefined) {
+        if(sendType === undefined) {
             res.end();
         } else {
-            if (sendContent === undefined) {
+            if(sendContent === undefined) {
                 logger.error('Send type was defined but send content was not. Ending response with no send content');
-            } else if (sendType === sendTypes.FILE) {
+            } else if(sendType === sendTypes.FILE) {
                 res.sendFile(sendContent);
-            } else if (sendType === sendTypes.STRING) {
+            } else if(sendType === sendTypes.STRING) {
                 res.send(sendContent);
-            } else if (sendType === sendTypes.JSON) {
+            } else if(sendType === sendTypes.JSON) {
                 res.json(sendContent);
             } else {
                 logger.error(`Specified send type does not exist. Ending response with status code 

@@ -1,3 +1,5 @@
+export {};
+
 // Module imports
 const Https = require('https');
 const FS = require('fs');
@@ -8,18 +10,25 @@ const airtableInterface = require('./airtable-intereface.js');
 const settings = require('./settings.js');
 
 // Other variable declarations
-//! Do not share the mapbox access token
 const EMPLOYEE_MAP_IMAGE_PATH = `${__dirname}/public/employee-map.png`;
 const PIN_NAME = 'pin-l';
 const PIN_LABEL = '1';
 const PIN_COLOR = '000'; // Hexadecimal value
 
+// Interface declarations
+interface Location {
+    Country: string,
+    State: string,
+    City: string
+}
+
 
 // -- PUBLIC METHODS -- //
 
 const methods = {
-    // Saves a static map of America with locations marked where interns are
-    saveStaticMap: function() {
+    // Saves a static map of America with locations marked where interns
+    //! This method is deprecated which is why it has one big try-catch block rather than specific error checks
+    saveStaticMap: () => {
         logger.info('Getting static map');
         return new Promise(async (resolve, reject) => {
             try {
@@ -81,8 +90,9 @@ const methods = {
                         reject(error);
                     });
 
-                    resolve();
+                    resolve(undefined);
 
+                    // TODO: Fix the way errors are handled here
                 }).on('error', (error) => {
                     logger.error(`Could not get static map due to error\n${error}`);
                     logger.trace();
@@ -97,57 +107,51 @@ const methods = {
     },
 
     // Returns a feature collection of markers for use with an interactive Mapbox map
-    getMarkers: function() {
+    getMarkers: () => {
         logger.info('Getting feature collection of markers');
-        return new Promise(async(resolve, reject) => {
-            try {
-                let markerList = [];
-                let getLocationCoordsPromises = [];
+        return new Promise(async(resolve) => {
+            let markerList = [];
+            let getLocationCoordsPromises = [];
 
-                // Get locations from Airtable interface
-                const locations = airtableInterface.getCachedRecords('Locations');
+            // Get locations from Airtable interface
+            const locations = airtableInterface.getCachedRecords('Locations');
 
-                // Loop through every location and add a marker to the marker list
-                locations.forEach((location) => {
+            // Loop through every location and add a marker to the marker list
+            locations.forEach((location) => {
 
-                    // Remove all the extra data to simplify things
-                    location = location.fields;
+                // Remove all the extra data to simplify things
+                location = location.fields;
 
-                    // Add markers to marker list
-                    getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
-                        markerList.push({
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Point',
-                                coordinates: [coords.x, coords.y]
-                            },
-                            properties: {
-                                title: 'Mapbox',
-                                description: `${location.City}, ${location.State}, ${location.Country}`
-                            }
-                        });
-                    }));
-                });
+                // Add markers to marker list
+                getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
+                    markerList.push({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [coords.x, coords.y]
+                        },
+                        properties: {
+                            title: 'Mapbox',
+                            description: `${location.City}, ${location.State}, ${location.Country}`
+                        }
+                    });
+                }));
+            });
 
-                // Create the Mapbox feature collection structure
-                const markerFeatureCollection = {
-                    type: 'FeatureCollection'
-                }
-
-                // Wait for market list to be complete
-                await Promise.all(getLocationCoordsPromises);
-
-                // Complete the Mapbox feature collection structure
-                markerFeatureCollection.features = markerList;
-
-                // Send marker collection
-                resolve(markerFeatureCollection);
-
-            } catch(error) {
-                logger.error(`Could not get feature collection of markers due to error\n${error}`);
-                logger.trace();
-                reject(error);
+            // Create the Mapbox feature collection structure
+            const markerFeatureCollection = {
+                type: 'FeatureCollection',
+                features: []
             }
+
+            // Wait for market list to be complete
+            await Promise.all(getLocationCoordsPromises);
+
+            // Complete the Mapbox feature collection structure
+            markerFeatureCollection.features = markerList;
+
+            // Send marker collection
+            resolve(markerFeatureCollection);
         });
     }
 }
@@ -159,51 +163,44 @@ module.exports = methods;
 // -- PRIVATE METHODS -- //
 
 // Get the longitude and latitude of a location
-function getLocationCoords(location) {
+function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number }> {
     return new Promise((resolve, reject) => {
-        try {
-            // Prepare location for use in URL
-            const country = replaceAll(location.Country.trim(), ' ', '+');
-            const state = replaceAll(location.State.trim(), ' ', '+');
-            const city = replaceAll(location.City.trim(), ' ', '+');
 
-            const LOCATION_URL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${city}+${state}+${country}
-                                  .json?access_token=${settings.MAPBOX_TOKEN}`;
+        // Prepare location for use in URL
+        const country = replaceAll(location.Country.trim(), ' ', '+');
+        const state = replaceAll(location.State.trim(), ' ', '+');
+        const city = replaceAll(location.City.trim(), ' ', '+');
 
-            Https.get(LOCATION_URL, (res) => {
-                logger.info(`Location geocoding response has status code "${res.statusCode}"`);
+        const LOCATION_URL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${city}+${state}+${country}
+                              .json?access_token=${settings.MAPBOX_TOKEN}`;
 
-                let geocodingData = '';
-                res.on('data', (dataChunk) => {
-                    geocodingData += dataChunk;
-                });
+        Https.get(LOCATION_URL, (res) => {
+            logger.info(`Location geocoding response has status code "${res.statusCode}"`);
 
-                res.on('end', () => {
-                    // Return the longitude-latitude coordinates of the location
-                    let center = JSON.parse(geocodingData).features[0]['center'];
-                    resolve({ x: center[0], y: center[1] });
-                });
+            // TODO: Consider making status codes a global setting
+            if(res.statusCode !== 200) {
+                logger.warn(`Mapbox geocoding API for coordinates has response code "${res.statusCode}"`);
+                reject();
+            }
 
-            }).on('error', (error) => {
-                logger.error(`Could not get location geocoding information due to error\n${error}`);
-                logger.trace();
-                reject(error);
+            let geocodingData = '';
+            res.on('data', (dataChunk) => {
+                geocodingData += dataChunk;
             });
-        } catch(error) {
-            logger.error(`Could not get location geocoding information due to error\n${error}`);
-            logger.trace();
-            reject(error);
-        }
+
+            res.on('end', () => {
+                // Return the longitude-latitude coordinates of the location
+                let center = JSON.parse(geocodingData).features[0]['center'];
+                resolve({ x: center[0], y: center[1] });
+            });
+
+        }).on('error', (error) => {
+            logger.warn(`Could not get location geocoding information due to error\n${error}`);
+            reject();
+        });
     });
 }
 
 function replaceAll(string, searchTarget, replacement) {
-    try {
-        // TODO: Fix cascading error logging when an error occurs here
-        return string.split(searchTarget).join(replacement);
-    } catch(error) {
-        logger.error(`Could not replace "${searchTarget}" with "${replacement}" in "${string}" due to error\n${error}`);
-        logger.trace();
-        return '';
-    }
+    return string.split(searchTarget).join(replacement);
 }

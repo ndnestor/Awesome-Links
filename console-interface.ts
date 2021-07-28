@@ -2,7 +2,7 @@
 const { memoryUsage } = require('process');
 
 // Script imports
-const logger = require('./global-logger.js');
+import { methods as logger } from './global-logger'
 
 // Create console listener
 const stdin = process.openStdin();
