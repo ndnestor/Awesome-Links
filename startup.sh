@@ -6,7 +6,7 @@ TS_BUILD_PATH="./typescript-build/" # Requires trailing slash
 ENTRY_FILE="main.js"
 
 # Checkout the release branch
-#! If git fails to checkout the release branch, the master branch will be by default
+#! If git fails to checkout the release branch, the master branch will be used by default
 echo "Performing git checkout on the release branch"
 sudo git checkout $RELEASE_BRANCH
 
