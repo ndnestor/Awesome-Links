@@ -5,24 +5,14 @@ const FS = require('fs');
 
 // Script imports
 import { methods as logger } from './global-logger';
+import { statusCodes } from "./http-constants";
+
 const airtableInterface = require('./airtable-intereface.js');
 const mapper = require('./mapper.js');
 require('./console-interface.js');
 
 // Other variable declarations
 const app = Express();
-const statusCodes = {
-    // Success responses
-    OK: 200,
-    CREATED: 201,
-
-    // Client errors
-    BAD_REQUEST: 400,
-    NOT_FOUND: 404,
-
-    // Server errors
-    INTERNAL_SERVER_ERROR: 500
-};
 
 const sendTypes = {
     STRING: 1,
@@ -54,6 +44,7 @@ app.listen(PORT, () => {
 
 // -- REQUEST HANDLING -- //
 
+// TODO: Remove the excessive try-catch blocks
 // Sends the root html file
 app.all('/', async(req, res) => {
     logger.info('Request on root was made');
@@ -263,8 +254,8 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
             } else if(sendType === sendTypes.JSON) {
                 res.json(sendContent);
             } else {
-                logger.error(`Specified send type does not exist. Ending response with status code 
-                ${statusCodes.INTERNAL_SERVER_ERROR} with no response content`);
+                logger.error(`Specified send type does not exist or has not been implemented yet.
+                 Ending response with status code ${statusCodes.INTERNAL_SERVER_ERROR} with no response content`);
                 logger.trace();
 
                 res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
