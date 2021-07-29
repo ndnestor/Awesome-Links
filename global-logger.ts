@@ -53,11 +53,10 @@ function writeBufferToLogFile() {
     });
 
     // Write message to log file
-    // TODO: Create log folder if it doesn't exist already
     FS.appendFile(logFilePath, messageToWrite, {flag: 'a'}, (error) => {
         if(error) {
             console.error(`Failed to write log message to file with error\n${error}`);
-            // TODO: Consider crashing
+            process.exit(1);
         }
     });
 
