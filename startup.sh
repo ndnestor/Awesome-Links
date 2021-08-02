@@ -17,6 +17,7 @@ sudo git pull
 # Install node modules as needed
 echo -e "===\nInstalling npm packages as needed"
 sudo npm install
+sudo npm install -g typescript
 
 # Create the required file paths
 echo -e "===\nMaking necessary directories"
