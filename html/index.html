@@ -42,40 +42,13 @@
 
         // Display the markers on the map
         fetch('/markers').then(markers => markers.json()).then((markers) => {
-            markers.features.forEach((marker) => {
-
-                const markerCoords = marker.geometry.coordinates;
-
-                let createNewVisibleMarker = true;
-                for(let i = 0; i < visibleMarkers.length; i++) {
-                    
-                    // Get distance between markers
-                    const markerDistance = distance(markerCoords, visibleMarkers[i].coordinates);
-                    if(markerDistance < markerCollapseDistance) {
-
-                        // Add location to pre-existing visible marker
-                        visibleMarkers[i].coordinates = averageCoordinates(visibleMarkers[i].coordinates, markerCoords);
-                        visibleMarkers[i].childMarkers.push(marker);
-                        createNewVisibleMarker = false;
-                    }                       
-                }
-
-                if(createNewVisibleMarker) {
-
-                    // Create new visible marker
-                    visibleMarkers.push({
-                        coordinates: markerCoords,
-                        childMarkers: [marker]
-                    });
-                }
-            });
 
             // Add markers to the map
-            visibleMarkers.forEach((visibleMarker) => {
+            markers.forEach((marker) => {
                 const markerElement = document.createElement('div');
                 markerElement.className = 'marker';
 
-                new mapboxgl.Marker(markerElement).setLngLat(visibleMarker.coordinates).addTo(map);
+                new mapboxgl.Marker(markerElement).setLngLat(marker.coordinates).addTo(map);
             });
 
         }).catch((error) => {

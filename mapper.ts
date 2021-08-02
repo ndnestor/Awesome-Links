@@ -100,7 +100,7 @@ const methods = {
 
     // Returns a feature collection of markers for use with an interactive Mapbox map
     getMarkers: () => {
-        logger.info('Getting feature collection of markers');
+        logger.info('Getting markers');
         return new Promise(async(resolve) => {
             let markerList = [];
             let getLocationCoordsPromises = [];
@@ -142,8 +142,11 @@ const methods = {
             // Complete the Mapbox feature collection structure
             markerFeatureCollection.features = markerList;
 
-            // Send marker collection
-            resolve(markerFeatureCollection);
+            // Generate a set of visible markers from the feature collection
+            const visibleMarkers = getVisibleMarkers(markerFeatureCollection);
+
+            // Send visible markers
+            resolve(visibleMarkers);
         });
     }
 }
@@ -190,6 +193,50 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
             reject();
         });
     });
+}
+
+function getVisibleMarkers(markers) {
+    const visibleMarkers = [];
+    const markerCollapseDistance = 1;
+
+    markers.features.forEach((marker) => {
+        const markerCoords = marker.geometry.coordinates;
+
+        let createNewVisibleMarker = true;
+        for(let i = 0; i < visibleMarkers.length; i++) {
+            
+            // Get distance between markers
+            const markerDistance = distance(markerCoords, visibleMarkers[i].coordinates);
+            if(markerDistance < markerCollapseDistance) {
+
+                // Add location to pre-existing visible marker
+                visibleMarkers[i].coordinates = averageCoordinates(visibleMarkers[i].coordinates, markerCoords);
+                visibleMarkers[i].childMarkers.push(marker);
+                createNewVisibleMarker = false;
+            }                       
+        }
+
+        if(createNewVisibleMarker) {
+
+            // Create new visible marker
+            visibleMarkers.push({
+                coordinates: markerCoords,
+                childMarkers: [marker]
+            });
+        }
+    });
+
+    return visibleMarkers;
+}
+
+// Return the distance between point A and point B
+function distance(pointA, pointB) {
+    return Math.sqrt(Math.pow(pointA[0] - pointB[0], 2) + Math.pow(pointA[1] - pointB[1], 2));
+}
+
+// Return the averaged point of point A and point B
+function averageCoordinates(pointA, pointB) {
+    return [(pointA[0] + pointB[0]) / 2, (pointA[1] + pointB[1]) / 2];
 }
 
 function replaceAll(string, searchTarget, replacement) {
