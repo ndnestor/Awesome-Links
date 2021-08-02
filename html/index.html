@@ -9,7 +9,6 @@
 
     <style>
         .marker {
-            background-image: url('/public/mapbox-marker.png');
             background-size: cover;
             width: 50px;
             height: 50px;
@@ -23,29 +22,44 @@
 
     <h1>Hello, World!</h1>
 
-    <img src='public/employee-map.png' alt='A Mapbox static map!'>
-
     <div id='map' style='width: 800px; height: 800px;'></div>
 
     <script>
+
+        // Set up Mapbox GL
         mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuYXdlc29tZWluYyIsImEiOiJja3F0bW9jMnkyNmdoMnZtejNjMTg0czRyIn0.x6imIZ-pCiJaIOMX3SdoQg';
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/nathanawesomeinc/ckqtmukm70m0417mu72g1yeee'
         });
 
-        fetch('/markers')
-            .then(markers => markers.json())
-            .then((markers) => {
-                markers.features.forEach((marker) => {
+        // Display the markers on the map
+        fetch('/markers').then(res => res.json()).then((markers) => {
+
+            // Add markers to the map
+            markers.forEach((marker) => {
                 const markerElement = document.createElement('div');
                 markerElement.className = 'marker';
 
-                new mapboxgl.Marker(markerElement).setLngLat(marker.geometry.coordinates).addTo(map);
+                // Get the image to use for the marker
+                markerElement.style.backgroundImage = `url('/public/mapbox-markers/${marker.childMarkers.length}.png')`;
+
+                new mapboxgl.Marker(markerElement).setLngLat(marker.coordinates).addTo(map);
             });
+
         }).catch((error) => {
             console.error(error);
         });
+
+        // Return the distance between point A and point B
+        function distance(pointA, pointB) {
+            return Math.sqrt(Math.pow(pointA[0] - pointB[0], 2) + Math.pow(pointA[1] - pointB[1], 2));
+        }
+
+        // Return the averaged point of point A and point B
+        function averageCoordinates(pointA, pointB) {
+            return [(pointA[0] + pointB[0]) / 2, (pointA[1] + pointB[1]) / 2];
+        }
 
     </script>
 
