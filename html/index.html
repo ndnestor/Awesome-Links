@@ -28,24 +28,69 @@
     <div id='map' style='width: 800px; height: 800px;'></div>
 
     <script>
+
+        // Variable declarations
+        const markerCollapseDistance = 1;
+        const visibleMarkers = [];
+
+        // Set up Mapbox GL
         mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuYXdlc29tZWluYyIsImEiOiJja3F0bW9jMnkyNmdoMnZtejNjMTg0czRyIn0.x6imIZ-pCiJaIOMX3SdoQg';
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/nathanawesomeinc/ckqtmukm70m0417mu72g1yeee'
         });
 
-        fetch('/markers')
-            .then(markers => markers.json())
-            .then((markers) => {
-                markers.features.forEach((marker) => {
+        // Display the markers on the map
+        fetch('/markers').then(markers => markers.json()).then((markers) => {
+            markers.features.forEach((marker) => {
+
+                const markerCoords = marker.geometry.coordinates;
+
+                let createNewVisibleMarker = true;
+                for(let i = 0; i < visibleMarkers.length; i++) {
+                    
+                    // Get distance between markers
+                    const markerDistance = distance(markerCoords, visibleMarkers[i].coordinates);
+                    if(markerDistance < markerCollapseDistance) {
+
+                        // Add location to pre-existing visible marker
+                        visibleMarkers[i].coordinates = averageCoordinates(visibleMarkers[i].coordinates, markerCoords);
+                        visibleMarkers[i].childMarkers.push(marker);
+                        createNewVisibleMarker = false;
+                    }                       
+                }
+
+                if(createNewVisibleMarker) {
+
+                    // Create new visible marker
+                    visibleMarkers.push({
+                        coordinates: markerCoords,
+                        childMarkers: [marker]
+                    });
+                }
+            });
+
+            // Add markers to the map
+            visibleMarkers.forEach((visibleMarker) => {
                 const markerElement = document.createElement('div');
                 markerElement.className = 'marker';
 
-                new mapboxgl.Marker(markerElement).setLngLat(marker.geometry.coordinates).addTo(map);
+                new mapboxgl.Marker(markerElement).setLngLat(visibleMarker.coordinates).addTo(map);
             });
+
         }).catch((error) => {
             console.error(error);
         });
+
+        // Return the distance between point A and point B
+        function distance(pointA, pointB) {
+            return Math.sqrt(Math.pow(pointA[0] - pointB[0], 2) + Math.pow(pointA[1] - pointB[1], 2));
+        }
+
+        // Return the averaged point of point A and point B
+        function averageCoordinates(pointA, pointB) {
+            return [(pointA[0] + pointB[0]) / 2, (pointA[1] + pointB[1]) / 2];
+        }
 
     </script>
 
