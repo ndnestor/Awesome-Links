@@ -182,13 +182,15 @@ app.get('/markers', async(req, res) => {
 });
 
 // Sends a file given a path from the public folder
-app.get('/public/:resource', async(req, res) => {
+app.get('/public/:resource*', async(req, res) => {
     logger.info('Request on /public/:resource was made');
     
     try {
-        const resource = req.params.resource;
-        
+        const paramaterlessPath = '/public/'
+        const resource = req.originalUrl.substr(req.originalUrl.indexOf(paramaterlessPath) + paramaterlessPath.length);
         const pathToResource = Path.join(process.cwd(), `public/${resource}`);
+
+        // TODO: Don't allow whole folders to be sent
 
         if(FS.existsSync(pathToResource)) {
             logger.info(`Sending resource "${resource}"`);
