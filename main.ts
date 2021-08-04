@@ -186,8 +186,8 @@ app.get('/public/:resource*', async(req, res) => {
     logger.info('Request on /public/:resource was made');
     
     try {
-        const paramaterlessPath = '/public/'
-        const resource = req.originalUrl.substr(req.originalUrl.indexOf(paramaterlessPath) + paramaterlessPath.length);
+        const parameterlessPath = '/public/'
+        const resource = req.originalUrl.substr(req.originalUrl.indexOf(parameterlessPath) + parameterlessPath.length);
         const pathToResource = Path.join(process.cwd(), `public/${resource}`);
 
         // TODO: Don't allow whole folders to be sent
