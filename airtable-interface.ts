@@ -13,11 +13,11 @@ const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 
 // Other variable declarations
 const cachedRecords = {};
-const tablesToCache = ['Employees', 'Locations'];
-const DB_UPDATE_INTERVAL = 10000;
+const TABLES_TO_CACHE = ['Employees', 'Locations'];
+const CACHE_UPDATE_INTERVAL = 10000;
 const MAX_DB_REQUESTS_PER_SECOND = 4; // Airtable can handle 5 with free version. Put 4 just to be safe
-
-let timeSinceLastDbRequest = 1 / MAX_DB_REQUESTS_PER_SECOND * 1000 + 1; // In ms
+const onCacheUpdateCallbacks = [];
+let timeSinceLastDbRequest; // In ms
 
 // Increment timeSinceLastDbRequest every ms
 setInterval(() => {
@@ -26,18 +26,28 @@ setInterval(() => {
 
 // Update cached records every so often
 setInterval(() => {
-    tablesToCache.forEach((tableName) => {
-        // noinspection JSIgnoredPromiseFromCall
-        methods.cacheRecords(tableName);
+    TABLES_TO_CACHE.forEach((tableName) => {
+
+        // Cache records
+        const oldCachedRecords = cachedRecords;
+        methods.cacheRecords(tableName).then((updatedRecords) => {
+
+            // Call a bunch of methods as needed if the records in cache have changed
+            if(oldCachedRecords != cachedRecords) {
+                onCacheUpdateCallbacks.forEach((method) => {
+                    method();
+                });
+            }
+        });
     });
-}, DB_UPDATE_INTERVAL);
+}, CACHE_UPDATE_INTERVAL);
 
 
 // -- PUBLIC METHODS -- //
 
-const methods = {
+export class methods {
     // Returns an array of records in the specified table and updates record cache
-    cacheRecords: (tableName: string): Promise<object[]> => {
+    public static cacheRecords(tableName: string): Promise<object[]> {
         logger.debug(`Caching records for "${tableName}"`);
         return new Promise((resolve) => {
             handleDbRequest(() => {
@@ -62,20 +72,20 @@ const methods = {
                 });
             });
         });
-    },
+    }
 
     // Return an array of records in the specified table synchronously
     // NOTE: Does not update the cache unlike cacheRecords()
-    getCachedRecords: (tableName: string): object[] => {
+    public static getCachedRecords (tableName: string): object[] {
         const result = cachedRecords[tableName];
         if(result === undefined) {
             logger.warn(`Table "${tableName}" has no cached records`);
         }
         return result;
-    },
+    }
 
     // Returns an array of records by field value in specified table
-    searchInField: (tableName: string, fieldName: string, fieldValue: any, isExact: boolean): Promise<object[]> => {
+    public static searchInField (tableName: string, fieldName: string, fieldValue: any, isExact: boolean): Promise<object[]> {
         logger.info(`Searching for record by field value. ` +
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
@@ -109,10 +119,10 @@ const methods = {
 
             resolve(searchResults);
         });
-    },
+    }
 
     // Add a record to the specified table
-    addRecords: (tableName: string, records: object): Promise<object[]> => {
+    public static addRecords (tableName: string, records: object): Promise<object[]> {
         logger.info(`Adding record to "${tableName}"`)
         return new Promise((resolve, reject) => {
             handleDbRequest(() => {
@@ -124,10 +134,10 @@ const methods = {
                 });
             });
         });
-    },
+    }
 
     // Deletes a record in the specified table
-    deleteRecords: (tableName: string, recordIDs: string[]): Promise<object[]> => {
+    public static deleteRecords (tableName: string, recordIDs: string[]): Promise<object[]> {
         logger.info(`Deleting record(s) from "${tableName}" with ID(s) "${recordIDs}"`);
         return new Promise((resolve, reject) => {
             handleDbRequest(() => {
@@ -140,10 +150,12 @@ const methods = {
             });
         });
     }
-};
 
-// Allow other files to use methods from this file
-module.exports = methods;
+    // Adds an item to th onCacheCallbacks array
+    public static addOnCacheCallback(method: () => void): void {
+        onCacheUpdateCallbacks.push(method);
+    }
+}
 
 
 // -- PRIVATE METHODS --//
