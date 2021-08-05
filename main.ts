@@ -133,7 +133,7 @@ app.delete('/delete-record', (req, res) => {
 app.get('/markers', (req, res) => {
     logger.info('Request on /markers was made');
 
-    const cachedMarkers = mapper.methods.getCachedMarkers();
+    const cachedMarkers = mapper.methods.getCachedVisibleMarkers();
     endResponse(res, statusCodes.OK, sendTypes.JSON, cachedMarkers);
 });
 
@@ -218,5 +218,20 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
             res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
         }
     }
+
+    // Handle terminate signal
+    // TODO: Figure out why this doesn't work
+    process.on('SIGTERM', () => {
+        logger.info('Waiting for Express.js server to stop...')
+        app.close(async () => {
+            logger.info(`Express.js server stopped`);
+            logger.info('Waiting for logger to finish writing buffer...');
+            await logger.waitForWrite().then(() => {
+                logger.info('Logger finished writing buffer');
+            }).catch(() => {
+                logger.error('Logger timed out before it could finish writing to buffer');
+            });
+        });
+    })
 }
 
