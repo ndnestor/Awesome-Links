@@ -6,7 +6,7 @@ const FS = require('fs');
 // Script imports
 import { methods as airtableInterface } from './airtable-interface';
 import { methods as logger } from './global-logger';
-import { statusCodes } from "./http-constants";
+import { statusCodes } from './http-constants';
 
 const mapper = require('./mapper.js');
 require('./console-interface.js');
@@ -29,17 +29,12 @@ app.use(Express.json());
 
 
 // Cache part of database
-airtableInterface.cacheRecords('Employees').catch(() => {
-    logger.error(`Could not do initial record caching for Employees table`);
-});
+// noinspection JSIgnoredPromiseFromCall
+airtableInterface.cacheRecords('Employees')
 airtableInterface.cacheRecords('Locations').then(() => {
 
     // Cache visible markers
-    mapper.cacheVisibleMarkers().catch(() => {
-        logger.error("Could not do initial visible marker caching");
-    });
-}).catch(() => {
-    logger.error(`Could not do initial record caching for Locations table`);
+    mapper.methods.cacheVisibleMarkers();
 });
 
 // Allow connections to the server
