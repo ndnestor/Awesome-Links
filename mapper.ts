@@ -93,13 +93,12 @@ export class methods {
                 }
             });
 
-            // TODO: Figure out if resolving here would cut the method short if the forEach loop doesn't finish
             resolve();
         });
     }
 
-    // TODO: Write comment
-    public static getCachedMarkers() {
+    // Returns the cached visible markers
+    public static getCachedVisibleMarkers() {
         return cachedVisibleMarkers;
     }
 }
@@ -145,7 +144,7 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
     });
 }
 
-// TODO: Write comment
+// Converts a Mapbox feature collection of markers into an array of visible markers
 // TODO: Make interface for markers
 function getVisibleMarkers(markers) {
     const visibleMarkers = [];
