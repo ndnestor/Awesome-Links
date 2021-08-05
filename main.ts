@@ -4,10 +4,10 @@ const Path = require('path');
 const FS = require('fs');
 
 // Script imports
+import { methods as airtableInterface } from './airtable-interface';
 import { methods as logger } from './global-logger';
 import { statusCodes } from "./http-constants";
 
-const airtableInterface = require('./airtable-intereface.js');
 const mapper = require('./mapper.js');
 require('./console-interface.js');
 
@@ -32,7 +32,13 @@ app.use(Express.json());
 airtableInterface.cacheRecords('Employees').catch(() => {
     logger.error(`Could not do initial record caching for Employees table`);
 });
-airtableInterface.cacheRecords('Locations').catch(() => {
+airtableInterface.cacheRecords('Locations').then(() => {
+
+    // Cache visible markers
+    mapper.cacheVisibleMarkers().catch(() => {
+        logger.error("Could not do initial visible marker caching");
+    });
+}).catch(() => {
     logger.error(`Could not do initial record caching for Locations table`);
 });
 
@@ -169,11 +175,8 @@ app.get('/markers', async(req, res) => {
     logger.info('Request on /markers was made');
 
     try {
-        mapper.getMarkers().then((markers) => {
-            endResponse(res, statusCodes.OK, sendTypes.JSON, markers);
-        }).catch(() => {
-            endResponse(res, statusCodes.INTERNAL_SERVER_ERROR);
-        });
+        const cachedMarkers = mapper.getCachedMarkers();
+        endResponse(res, statusCodes.OK, sendTypes.JSON, cachedMarkers);
     } catch(error) {
         logger.error(error);
         logger.trace();
