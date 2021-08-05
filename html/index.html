@@ -42,7 +42,14 @@
                 markerElement.className = 'marker';
 
                 // Get the image to use for the marker
-                markerElement.style.backgroundImage = `url('/public/mapbox-markers/${marker.childMarkers.length}.png')`;
+                const numChildMarkers = marker.childMarkers.length;
+                let backgroundImage;
+                if(numChildMarkers === 1) {
+                    backgroundImage = `url('/public/mapbox-marker.png')`;
+                } else {
+                    backgroundImage = `url('/public/mapbox-server/${marker.childMarkers.length}.png')`;
+                }
+                markerElement.style.backgroundImage = backgroundImage;
 
                 new mapboxgl.Marker(markerElement).setLngLat(marker.coordinates).addTo(map);
             });
