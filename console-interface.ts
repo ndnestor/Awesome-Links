@@ -31,10 +31,6 @@ function handleConsoleCmd(command) {
         case 'ram':
             response += `${memoryUsage().rss / 1000000} megabytes of physical RAM are being used`;
             break;
-        case 'stop':
-            response += 'Stopping process...'
-            process.kill(process.pid, 'SIGTERM');
-            break;
         default:
             response += 'Command not found';
     }

@@ -38,7 +38,7 @@ airtableInterface.cacheRecords('Locations').then(() => {
 });
 
 // Allow connections to the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     logger.info(`The server is listening on port "${PORT}"`);
 });
 
@@ -218,20 +218,22 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
             res.statusCode(statusCodes.INTERNAL_SERVER_ERROR).end();
         }
     }
-
-    // Handle terminate signal
-    // TODO: Figure out why this doesn't work
-    process.on('SIGTERM', () => {
-        logger.info('Waiting for Express.js server to stop...')
-        app.close(async () => {
-            logger.info(`Express.js server stopped`);
-            logger.info('Waiting for logger to finish writing buffer...');
-            await logger.waitForWrite().then(() => {
-                logger.info('Logger finished writing buffer');
-            }).catch(() => {
-                logger.error('Logger timed out before it could finish writing to buffer');
-            });
-        });
-    })
 }
+
+// Handle SIGINT signal. This signal is sent by Ctrl+C
+process.on('SIGINT', () => {
+    logger.info('Received SIGINT signal to end execution');
+    logger.info('Waiting for Express.js server to stop...');
+    server.close(async () => {
+        logger.info(`Express.js server has stopped`);
+        logger.info('Waiting for logger to finish writing buffer...');
+        await logger.waitForWrite().then(() => {
+            logger.info('Logger finished writing buffer');
+        }).catch(() => {
+            logger.error('Logger timed out before it could finish writing to buffer');
+        }).finally(() => {
+            process.exit();
+        });
+    });
+})
 
