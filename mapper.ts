@@ -15,7 +15,7 @@ const settings = require('./settings.js');
 
 // Other variable declarations
 const MARKER_ICON_PATH = './public/mapbox-marker.png'; // TODO: Move marker icon out of public folder
-const MARKER_FONT_PATH = './fonts/Bahnschrift.fnt';
+const MARKER_FONT_PATH = './fonts/bahnschrift/bahnschrift.fnt';
 const MARKER_IMAGE_EXTENSION = 'png';
 let cachedVisibleMarkers = [];
 
@@ -53,16 +53,20 @@ export class methods {
 
                 // Add markers to marker list
                 getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
-                    markerList.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [coords.x, coords.y]
-                        },
-                        properties: {
-                            title: 'Mapbox',
-                            description: `${location.City}, ${location.State}, ${location.Country}`
-                        }
+                    location['Employees'].forEach(() => {
+
+                        markerList.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [coords.x, coords.y]
+                            },
+                            properties: {
+                                title: 'Mapbox',
+                                description: `${location.City}, ${location.State}, ${location.Country}`
+                            }
+                        });
+
                     });
                 }));
             });
@@ -148,7 +152,7 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
 // TODO: Make interface for markers
 function getVisibleMarkers(markers) {
     const visibleMarkers = [];
-    const markerCollapseDistance = 1;
+    const markerCollapseDistance = 1; // TODO: Move to top
 
     markers.features.forEach((marker) => {
         const markerCoords = marker.geometry.coordinates;
@@ -164,7 +168,7 @@ function getVisibleMarkers(markers) {
                 visibleMarkers[i].coordinates = averageCoordinates(visibleMarkers[i].coordinates, markerCoords);
                 visibleMarkers[i].childMarkers.push(marker);
                 createNewVisibleMarker = false;
-            }                       
+            }
         }
 
         if(createNewVisibleMarker) {

@@ -9,10 +9,11 @@
 
     <style>
         .marker {
-            background-size: cover;
+            background-size: contain;
+            background-position: center center;
+            background-repeat: no-repeat;
             width: 50px;
             height: 50px;
-            border-radius: 50%;
             cursor: pointer;
         }
     </style>
@@ -44,10 +45,11 @@
                 // Get the image to use for the marker
                 const numChildMarkers = marker.childMarkers.length;
                 let backgroundImage;
+                console.log(JSON.stringify(marker));
                 if(numChildMarkers === 1) {
                     backgroundImage = `url('/public/mapbox-marker.png')`;
                 } else {
-                    backgroundImage = `url('/public/mapbox-server/${marker.childMarkers.length}.png')`;
+                    backgroundImage = `url('/public/mapbox-markers/${marker.childMarkers.length}.png')`;
                 }
                 markerElement.style.backgroundImage = backgroundImage;
 
