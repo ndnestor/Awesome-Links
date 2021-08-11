@@ -113,4 +113,18 @@ export class methods {
         const stackTrace = new Error().stack;
         traceLogger.trace(stackTrace);
     }
+
+    //! Relatively untested
+    public static waitForWrite(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            setInterval(() => {
+                if(writeFileBuffer.length === 0) {
+                    resolve();
+                }
+            }, writeFileInterval);
+            setTimeout(() => {
+                reject();
+            }, writeFileInterval * 3); // TODO: Create a proper variable for this
+        })
+    }
 }

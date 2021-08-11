@@ -12,6 +12,10 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\typescript-build\\main.js",
+            "args": [
+                "-r",
+                "source-map-support/register"
+            ],
             "outputCapture": "std"
         }
     ]

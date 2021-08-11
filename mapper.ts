@@ -5,16 +5,19 @@ const Https = require('https');
 const FS = require('fs');
 
 // Script imports
+import { methods as airtableInterface } from './airtable-interface';
+import { imageManipulator } from './image-manipulator';
 import { methods as logger } from './global-logger';
 import { statusCodes } from "./http-constants";
-const airtableInterface = require('./airtable-intereface.js');
+
+//const airtableInterface = require('./airtable-intereface.js');
 const settings = require('./settings.js');
 
 // Other variable declarations
-const EMPLOYEE_MAP_IMAGE_PATH = `${__dirname}/public/employee-map.png`;
-const PIN_NAME = 'pin-l';
-const PIN_LABEL = '1';
-const PIN_COLOR = '000'; // Hexadecimal value
+const MARKER_ICON_PATH = './public/mapbox-marker.png'; // TODO: Move marker icon out of public folder
+const MARKER_FONT_PATH = './fonts/bahnschrift/bahnschrift.fnt';
+const MARKER_IMAGE_EXTENSION = 'png';
+let cachedVisibleMarkers = [];
 
 // Interface declarations
 interface Location {
@@ -23,85 +26,19 @@ interface Location {
     City: string
 }
 
+// On cached record callback setup
+airtableInterface.addOnCacheCallback(() => methods.cacheVisibleMarkers());
+
 
 // -- PUBLIC METHODS -- //
 
-const methods = {
-    // Saves a static map of America with locations marked where interns
-    //! This method is deprecated which is why it has one big try-catch block rather than specific error checks
-    saveStaticMap: () => {
-        logger.info('Getting static map');
-        return new Promise(async (resolve, reject) => {
-
-            // Get locations from Airtable using the Airtable interface
-            const locations = airtableInterface.getCachedRecords('Locations');
-
-            // Get the static map's URL
-            const mapStyleUrl = `https://api.mapbox.com/styles/v1/${settings.MAPBOX_STYLE_KEY}/static/`;
-
-            let markerPath = '';
-            let getLocationCoordsPromises = [];
-            locations.forEach((location) => {
-
-                // Remove all the extra data to simplify things
-                location = location.fields;
-
-                // Get location coordinates
-                getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
-                    if(coords === undefined) {
-                        logger.warn(`Could not mark location "${location}" because coordinates could not be obtained`);
-                    } else {
-                        if(markerPath !== '') {
-                            markerPath += ',';
-                        }
-                        markerPath += `${PIN_NAME}-${PIN_LABEL}+${PIN_COLOR}(${coords.x},${coords.y})`;
-                    }
-                }).catch((error) => {
-                    logger.error(`Could not add location coords to marker path due to error\n${error}`);
-                    logger.trace();
-                }));
-            });
-
-            // Wait for promises to resolve
-            await Promise.all(getLocationCoordsPromises);
-
-
-            markerPath += '/';
-
-            const mapBoundsPath = `[-128.6095,21.4392,-60.6592,54.0095]/800x500?access_token=${settings.MAPBOX_TOKEN}`;
-            const mapUrl = mapStyleUrl + markerPath + mapBoundsPath;
-
-            // Request the static map
-            Https.get(mapUrl, (res) => {
-                logger.info(`Static map response has status code "${res.statusCode}"`);
-
-                // Save the static map image as a file
-                const imageWriteStream = FS.createWriteStream(EMPLOYEE_MAP_IMAGE_PATH);
-
-                res.pipe(imageWriteStream);
-
-                imageWriteStream.on('finish', () => {
-                    imageWriteStream.close();
-                    logger.info('Saved map image');
-
-                }).on('error', (error) => {
-                    logger.error(`Could not write map image due to error\n${error}`);
-                    reject(error);
-                });
-
-                resolve(undefined);
-
-            }).on('error', (error) => {
-                logger.error(`Could not get static map due to error\n${error}`);
-                reject(error);
-            });
-        });
-    },
+export class methods {
 
     // Returns a feature collection of markers for use with an interactive Mapbox map
-    getMarkers: () => {
-        logger.info('Getting markers');
-        return new Promise(async(resolve) => {
+    //! Has not been tested with markers that collapse together
+    public static cacheVisibleMarkers() {
+        logger.info('Caching visible markers');
+        return new Promise<void>(async(resolve) => {
             let markerList = [];
             let getLocationCoordsPromises = [];
 
@@ -109,23 +46,27 @@ const methods = {
             const locations = airtableInterface.getCachedRecords('Locations');
 
             // Loop through every location and add a marker to the marker list
-            locations.forEach((location) => {
+            locations.forEach((location: Location) => {
 
                 // Remove all the extra data to simplify things
-                location = location.fields;
+                location = location['fields'];
 
                 // Add markers to marker list
                 getLocationCoordsPromises.push(getLocationCoords(location).then((coords) => {
-                    markerList.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [coords.x, coords.y]
-                        },
-                        properties: {
-                            title: 'Mapbox',
-                            description: `${location.City}, ${location.State}, ${location.Country}`
-                        }
+                    location['Employees'].forEach(() => {
+
+                        markerList.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [coords.x, coords.y]
+                            },
+                            properties: {
+                                title: 'Mapbox',
+                                description: `${location.City}, ${location.State}, ${location.Country}`
+                            }
+                        });
+
                     });
                 }));
             });
@@ -142,17 +83,29 @@ const methods = {
             // Complete the Mapbox feature collection structure
             markerFeatureCollection.features = markerList;
 
-            // Generate a set of visible markers from the feature collection
-            const visibleMarkers = getVisibleMarkers(markerFeatureCollection);
+            // Save visible markers in cache
+            cachedVisibleMarkers = getVisibleMarkers(markerFeatureCollection);
 
-            // Send visible markers
-            resolve(visibleMarkers);
+            // Create marker images as needed
+            cachedVisibleMarkers.forEach((visibleMarker) => {
+                const numChildMarkers = visibleMarker.childMarkers.length;
+                const newMarkerImagePath = `./public/mapbox-markers/${numChildMarkers}.${MARKER_IMAGE_EXTENSION}`;
+                if(numChildMarkers > 1 && !FS.existsSync(newMarkerImagePath)) {
+
+                    // Create the marker image
+                    imageManipulator.appendText(MARKER_ICON_PATH, MARKER_FONT_PATH, newMarkerImagePath, `${numChildMarkers}`);
+                }
+            });
+
+            resolve();
         });
     }
-}
 
-// Allow other files to use methods from this file
-module.exports = methods;
+    // Returns the cached visible markers
+    public static getCachedVisibleMarkers() {
+        return cachedVisibleMarkers;
+    }
+}
 
 
 // -- PRIVATE METHODS -- //
@@ -195,9 +148,11 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
     });
 }
 
+// Converts a Mapbox feature collection of markers into an array of visible markers
+// TODO: Make interface for markers
 function getVisibleMarkers(markers) {
     const visibleMarkers = [];
-    const markerCollapseDistance = 1;
+    const markerCollapseDistance = 1; // TODO: Move to top
 
     markers.features.forEach((marker) => {
         const markerCoords = marker.geometry.coordinates;
@@ -213,7 +168,7 @@ function getVisibleMarkers(markers) {
                 visibleMarkers[i].coordinates = averageCoordinates(visibleMarkers[i].coordinates, markerCoords);
                 visibleMarkers[i].childMarkers.push(marker);
                 createNewVisibleMarker = false;
-            }                       
+            }
         }
 
         if(createNewVisibleMarker) {

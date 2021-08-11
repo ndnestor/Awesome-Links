@@ -14,10 +14,10 @@
 # Project-generated
 /logs/
 /typescript-build/
-/public/employee-map.png
+/public/mapbox-markers/
 
 # Personal files
-/Object Planning.drawio
+*.drawio
 
 # HTTP Client
 *.http
