@@ -138,6 +138,7 @@ app.get('/markers', (req, res) => {
 });
 
 // Sends a file given a path from the public folder
+//! TODO: Don't allow getting resources in folders higher than public
 app.get('/public/:resource*', (req, res) => {
     logger.info('Request on /public/:resource* was made');
     

@@ -7,6 +7,7 @@ import { methods as logger } from './global-logger';
 export class imageManipulator {
 
     // Overlay text on an image at the specified relative position
+    // TODO: Add offset parameter
     public static appendText(imagePath: string, fontPath: string, outPath: string, text: string): Promise<void> {
         return new Promise((resolve, reject) => {
             // TODO: Add logging
