@@ -23,6 +23,7 @@ const PORT = 8080;
 
 
 // -- SERVER SETUP -- //
+
 // Allow Express to parse JSON
 app.use(Express.urlencoded({extended: true}));
 app.use(Express.json());
@@ -30,7 +31,7 @@ app.use(Express.json());
 
 // Cache part of database
 // noinspection JSIgnoredPromiseFromCall
-airtableInterface.cacheRecords('Employees')
+airtableInterface.cacheRecords('Employees');
 airtableInterface.cacheRecords('Locations').then(() => {
 
     // Cache visible markers
@@ -142,7 +143,7 @@ app.get('/markers', (req, res) => {
 app.get('/public/:resource*', (req, res) => {
     logger.info('Request on /public/:resource* was made');
     
-    const parameterlessPath = '/public/'
+    const parameterlessPath = '/public/';
     const resource = req.originalUrl.substr(req.originalUrl.indexOf(parameterlessPath) + parameterlessPath.length);
     const pathToResource = Path.join(process.cwd(), `public/${resource}`);
 
@@ -168,6 +169,7 @@ app.get('/public/:resource*', (req, res) => {
     });
 });
 
+// Sends an HTTP response back to the client
 // TODO: Flesh out method to handle changing content headers
 function endResponse(res, statusCode, sendType=undefined, sendContent=undefined) {
 
@@ -221,9 +223,24 @@ function endResponse(res, statusCode, sendType=undefined, sendContent=undefined)
     }
 }
 
-// Handle SIGINT signal. This signal is sent by Ctrl+C
+
+// -- SERVER TERMINATION HANDLING -- //
+
+// Handles SIGINT signal. This signal is sent by Ctrl+C
 process.on('SIGINT', () => {
     logger.info('Received SIGINT signal to end execution');
+    endGracefully(0); // This is the "everything is fine" exit code
+});
+
+// Handles crashing due to an uncaught error
+process.on('uncaughtException', (error: Error) => {
+    const divider = '///////////////////////////////////';
+    logger.error(`\nUNCAUGHT EXCEPTION\n${divider}\n${error}\n${divider}`);
+    endGracefully(1); // This is the "abnormal termination" exit code
+});
+
+// Gets called before the process exits unless it is focefully terminated
+function endGracefully(exitCode: number) {
     logger.info('Waiting for Express.js server to stop...');
     server.close(async () => {
         logger.info(`Express.js server has stopped`);
@@ -233,8 +250,7 @@ process.on('SIGINT', () => {
         }).catch(() => {
             logger.error('Logger timed out before it could finish writing to buffer');
         }).finally(() => {
-            process.exit();
+            process.exit(exitCode);
         });
     });
-})
-
+}
