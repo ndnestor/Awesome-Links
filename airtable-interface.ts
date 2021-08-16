@@ -162,7 +162,7 @@ export class methods {
 
 // Prevents database requests occurring too often
 //! All database requests should be handled through this
-// TODO: Determine if this method works when multiple requests are deferred at once
+// TODO: Determine if this method works when multiple requests are deferred at once. It probably does not
 function handleDbRequest(method): void {
     // Check if we are sending requests too fast
     let timeoutTime = 0;

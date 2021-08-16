@@ -8,6 +8,7 @@ const FS = require('fs');
 // Other variable declarations
 const logFilePath = `./logs/${Moment().format('YYYY-MM-DD - HH-mm-ss ZZ')} Awesome Links.log`;
 const writeFileInterval = 1000; // In ms
+const waitForWriteTimeout = 5000; // In ms
 const writeFileBuffer = [];
 let writeFileTimerIsActive; //? A bit verbose, consider renaming
 const traceLogger = Logger.get('Trace Logger');
@@ -125,7 +126,7 @@ export class methods {
             }, writeFileInterval);
             setTimeout(() => {
                 reject();
-            }, writeFileInterval * 3); // TODO: Create a proper variable for this
+            }, waitForWriteTimeout);
         })
     }
 }
