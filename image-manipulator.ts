@@ -52,8 +52,7 @@ export class imageManipulator {
                 });
 
             }).catch((error) => {
-                // TODO: Throw and log error
-                console.error(error.toString());
+                logger.error(error.toString());
                 reject();
             });
         });

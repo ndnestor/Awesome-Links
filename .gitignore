@@ -16,9 +16,9 @@
 /typescript-build/
 /public/mapbox-markers/
 
-# Personal files
+# Planning files
 *.drawio
 
-# HTTP Client
+# HTTP client
 *.http
 *.rest

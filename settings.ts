@@ -9,7 +9,7 @@ addProperty('MAPBOX_STYLE_KEY', 'nathanawesomeinc/ckqtmukm70m0417mu72g1yeee');
 
 // TODO: Allow for adding multiple properties at once with an array
 // TODO: Consider adding something for intellij/ intellisense to recognize added properties
-// TODO: Write description comment here
+// Adds a constant property to the settings
 function addProperty(key, value) {
 
     // Create read-only properties

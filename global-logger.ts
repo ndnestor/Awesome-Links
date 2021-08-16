@@ -114,7 +114,8 @@ export class methods {
         traceLogger.trace(stackTrace);
     }
 
-    //! Relatively untested
+    //! Relatively untested. In fact, it likely does not work
+    // TODO: Fix
     public static waitForWrite(): Promise<void> {
         return new Promise((resolve, reject) => {
             setInterval(() => {

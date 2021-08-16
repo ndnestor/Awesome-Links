@@ -235,7 +235,7 @@ process.on('SIGINT', () => {
 // Handles crashing due to an uncaught error
 process.on('uncaughtException', (error: Error) => {
     const divider = '///////////////////////////////////';
-    logger.error(`\nUNCAUGHT EXCEPTION\n${divider}\n${error}\n${divider}`);
+    logger.error(`\nUNCAUGHT EXCEPTION\n${divider}\n${error.stack}\n${divider}`);
     endGracefully(1); // This is the "abnormal termination" exit code
 });
 

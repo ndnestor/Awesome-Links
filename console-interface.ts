@@ -42,9 +42,13 @@ function handleConsoleCmd(command: string, args: string[]): void {
 
     // Run the appropriate code based on the command
     switch(command) {
+        
+        // Show RAM usage
         case 'ram':
             response += `${memoryUsage().rss / 1000000} megabytes of physical RAM are being used`;
             break;
+
+        // Show the cached records in the specified table
         case 'cached-records':
             if(args.length !== 1) {
                 logger.warn('"cached records" command takes one argument');
