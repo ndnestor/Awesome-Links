@@ -158,7 +158,7 @@ sudo startup.sh
 ```
 5. When prompted for a password type "inceawesome957" (now that this password is in plain text here, it should probably be changed by making a new deploy key and deleting the old one)
 
-After doing this, the server will run on the latest version of the master branch. It is worth nothing that although the server will be running with the updated files, the old `startup.sh` will still be used. For this reason, if the master branch contains a new `startup.sh` file, you will need to [stop the web server](#stopping-the-web-server) and type `sudo startup.sh` again after the server starts the first time.
+After doing this, the server will run on the latest version of the master branch. It is worth noting that although the server will be running with the updated files, the old `startup.sh` will still be used. For this reason, if the master branch contains a new `startup.sh` file, you will need to [stop the web server](#stopping-the-web-server) and type `sudo startup.sh` again after the server starts the first time.
 
 ### Stopping the web server
 There are many ways to stop the web server (turning off VM instance, using the `kill` command, etc) but the safest way is to press `Ctrl+C` while connected to the server's Screen instance. The server will gracefully exit by finishing up certain tasks before completely terminating. AFter that it is safe to turn off the VM instance if needed.
