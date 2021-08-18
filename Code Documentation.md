@@ -135,7 +135,7 @@ Used to run the updated release branch code. See the "Managing the Server" secti
 ## Style Guide
 
 ---
-### Files
+### Files and folders
 All files and folders except .md files are named with lowercase alphanumerics and use dashes instead of spaces. Markdown files are written like normal titles excluding README.md.
 
 ### Code
