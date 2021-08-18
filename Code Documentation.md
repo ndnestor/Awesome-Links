@@ -126,7 +126,7 @@ Manages global constant properties to be accessed by multiple files. Originally 
 // Adds a constant property to the settings
 // key: The name of the setting
 // value: The value of the setting
-defineProperty(key, value): void
+addProperty(key, value): void
 ```
 
 ### startup.sh
