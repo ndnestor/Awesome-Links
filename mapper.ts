@@ -14,7 +14,7 @@ import { statusCodes } from "./http-constants";
 const settings = require('./settings.js');
 
 // Other variable declarations
-const MARKER_ICON_PATH = './public/mapbox-marker.png'; // TODO: Move marker icon out of public folder
+const MARKER_ICON_PATH = './public/mapbox-marker.png'; // TODO: Move marker icon out of public folder and add duplicated as 1.png
 const MARKER_FONT_PATH = './fonts/bahnschrift/bahnschrift.fnt';
 const MARKER_IMAGE_EXTENSION = 'png';
 let cachedVisibleMarkers = [];
