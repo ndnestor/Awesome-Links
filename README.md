@@ -4,12 +4,13 @@
 
 ---
 - [Quick Start](#quick-start)
-- [Style Guide](#style-guide)
-- [Github Process](#github-process)
+- [GitHub Process](#github-process)
 - [File Structure](#file-structure)
 - [Frameworks / Libraries](#frameworks--libraries)
 - [Managing the Server](#managing-the-server)
+- [Managing the Database](#managing-the-database)
 - [Useful IDE Extensions](#useful-ide-extensions)
+- [More Information](#more-information)
 
 ## Quick Start
 
@@ -40,71 +41,53 @@ cd Awesome-Links
 startup.sh init
 ```
 
-## Style Guide
+### Running the code
+There are a few ways to run your code
 
----
-### Files
-All files and folders are named with lowercase alphanumerics and use dashes instead of spaces.
-
-### Code
-This is the coding style that has been used throughout (nearly) the entire project. You can make up or break rules wherever it seems warranted
-```typescript
-//! This is an important comment
-//? This is a comment asking a question
-// TODO: This comment refers to some future work that should be done here
-// FIXME: This comment refers to a bug that needs fixing here
-
-// Root scope variable naming
-const IMMUTABLE_CONSTANT = 'some value that will never change';
-const mutableConstant = ObjectWhosePropertiesCanChange();
-let notConstant = 'a value that can change';
-
-// Open brace on the same line as condition
-if(condition) {
-    
-    // There is a space before every comment
-    doSomething(); // Unless it comes after functioning code like this
-    
-    // Immutable constants that are not at the root scope are written in cammel case
-    const localConstant = "a value";
-} else {
-    
-    // Comments do not have periods after them
-    // Unless it requires multiple sentences and is inconvenient to have a new comment for each sentence
-    console.log('Use single quotes, not double quotes');
-    
-    // Use lambda notation for callbacks
-    functionWithCallback(() => {
-        doSomething();
-    }); // Explicitly use semi-colons where possible
-}
-
-
-// -- SECTION HEADER -- //
-
-// There are two empty lines before a section header and one after
+#### From terminal
+Type the following command:
+```shell
+node .\typescript-build\main.js -r source-map-support/register
 ```
 
-## Github Process
+#### From VS Code
+A launch.json file is provided with this repo meaning that no set up is required to launch the project form Visual Studio Code. Press ``Ctrl+F5`` to run normally, ``F5`` to run in debug mode, or press the corresponding buttons under the "Run" menu at the top of the window. Note that this method does not work perfectly as you cannot send messages to the program via stdin meaning that console commands will not work during runtime. This is mostly okay because the need to use stdin in rare. To get around this, you can use the built-in terminal in Visual Studio Code by following the [instructions for running the code via terminal](#from-terminal).
+
+#### From JetBrains WebStorm
+Setting up WebStorm to run the project properly requires a few easy steps:
+1. Double tap shift.
+2. Search for and select "Edit Configurations...".
+3. Click the add button on the top left (it is a plus sign).
+4. Select Node.js
+5. Set the node parameter setting to "-r source-map-support/register".
+6. Set the JavaScript file setting to ".\typescript-build\main.js".
+7. Give the configuration a name.
+8. Click "OK".
+
+From there you can press ``Shift+F10`` to run it normally, ``Shift+F9`` to run in debug mode, or press the corresponding buttons on the top left.
+
+## GitHub Process
 
 ---
 This repo uses the principles of [continuous integration](https://www.atlassian.com/continuous-delivery/continuous-integration). This is not so important if you are working alone but if multiple people are working on this repo at once, it is useful to understand it. What is most important is following these basic rules:
 
 ### If working alone
-- Pull from the dev branch when first starting on the project. The dev branch should by the most up-to-date branch.
+- Pull from the dev branch when first starting on the project. The dev branch should be the most up-to-date branch.
 - Make edits on the dev branch *only*.
 - Merge your dev branch with the master branch *only* once you know that the dev branch is stable as anything that is on the master branch is subject to being deployed.
 ### If working with others
-- Pull from the dev branch when first starting on the project. The dev branch should by the most up-to-date branch.
+- Pull from the dev branch when first starting on the project. The dev branch should be the most up-to-date branch.
 - Create feature branches off of the dev branch and make your edits there.
 - Merge your feature branch with the dev branch often.
 - Create a testing branch off of the dev branch before deploying any new code.
 - Once the testing branch is deemed stable enough, merge into the master branch.
 
+Regardless of whether you are working alone or not, remember to make clear yet brief git commit message. For example, "Added search method to database file" is a lot better than "Updated database file". Use vague git commit messages only when what you changed will surely not affect another programmer (i.e. fixing a typo or making a small edit to .md files).
+
 ## File Structure
 
 ---
-- All folders and files follow the same naming scheme. It is all written in lowercase with dashes used to separate words (i.e. `my-file`)
+- Most files are written in lowercase with dashes used to separate words. Check the "Style Guide" section of the [code documentation](Code%20Documentation.md) for more info.
 - All html files are located in /html
 - All non-html files that are public (which means anyone can access them without authorization) are located in /public. Any sensitive information **must not** be put in /public.
 - /typescript-build is where transpiled Typescript files are located as specified in tsconfig.json. You should not add anything to this folder manually.
@@ -137,6 +120,15 @@ This repo uses the principles of [continuous integration](https://www.atlassian.
 ## Managing the Server
 
 ---
+### About the server
+The server runs on a [Google Cloud compute engine](https://cloud.google.com/compute/) virtual machine. Here are its specifications:
+- OS: Linux (Debian 10)
+- Processor: 1 vCPU
+- RAM: 0.6 GBs
+- Storage: 30 GBs
+
+There is [documentation on the compute engine](https://cloud.google.com/compute/docs) available online.
+
 ### SSH-ing into the server
 1. Go to [Google Cloud](https://cloud.google.com).
 2. Click "console" on the top right.
@@ -147,7 +139,6 @@ This repo uses the principles of [continuous integration](https://www.atlassian.
 
 ### Updating and running the Server
 These are the steps for running the server on the current version of the master branch:
-
 1. [SSH into the server](#ssh-ing-into-the-server).
 2. [Reattach to the server's Screen](https://linuxize.com/post/how-to-use-linux-screen/#reattach-to-a-linux-screen). If there is not one, start a new [named Screen session](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session).
 3. [Stop the web server](#stopping-the-web-server) if it is already running.
@@ -161,17 +152,35 @@ sudo startup.sh
 After doing this, the server will run on the latest version of the master branch. It is worth noting that although the server will be running with the updated files, the old `startup.sh` will still be used. For this reason, if the master branch contains a new `startup.sh` file, you will need to [stop the web server](#stopping-the-web-server) and type `sudo startup.sh` again after the server starts the first time.
 
 ### Stopping the web server
-There are many ways to stop the web server (turning off VM instance, using the `kill` command, etc) but the safest way is to press `Ctrl+C` while connected to the server's Screen instance. The server will gracefully exit by finishing up certain tasks before completely terminating. AFter that it is safe to turn off the VM instance if needed.
+There are many ways to stop the web server (turning off VM instance, using the `kill` command, etc.) but the safest way is to press `Ctrl+C` while connected to the server's Screen instance. The server will gracefully exit by finishing up certain tasks before completely terminating. After that it is safe to turn off the VM instance if needed.
+
+## Managing the Database
+
+---
+TODO: Complete this section
 
 ## Useful IDE Extensions
 
 ---
-### For Visual Studio Code
-- [Better Comments](https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments): Highlights certain comments consistent with the code [style guide](#style-guide).
+The default settings for the following extensions and plugins will work well enough.
+### Extensions for Visual Studio Code
+- [Better Comments](https://marketplace.visualstudio.com/items?itemName=aaron-bond.better-comments): Highlights certain comments consistent with the code (See the "Style Guide" section in the [code documentation](Code%20Documentation.md)).
 - [IntelliSense for CSS class names in HTML](https://marketplace.visualstudio.com/items?itemName=Zignd.html-css-class-completion): It is exactly what the name describes.
-- [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client): Lets you run HTTP requests from within VS Code. Especially useful for DELETE and PUT requests since browsers cannot do those without using special extensions.
+- [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client): Lets you run HTTP requests from within VS Code. Especially useful for testing DELETE and PUT requests since browsers cannot do those without using special extensions.
 - [Visual Studio IntelliCode](https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode): Provides really nice improvements to the way IntelliSense works. Supports TS and JS among other languages.
-- [Rainbow Brackets](https://marketplace.visualstudio.com/items?itemName=2gua.rainbow-brackets): Makes understanding nested parathenses and brackets that are common in JS/TS easier to understand.
+- [Rainbow Brackets](https://marketplace.visualstudio.com/items?itemName=2gua.rainbow-brackets): Makes understanding nested parentheses and brackets that are common in JS/TS easier to understand.
 
-### For JetBrains WebStorm
-TODO: Check what extensions I have on WebStorm
+### Plugins for JetBrains WebStorm
+- [Comments Highlighter](https://plugins.jetbrains.com/plugin/12895-comments-highlighter): Highlights certain comments consistent with the code (See the "Style Guide" section in the [code documentation](Code%20Documentation.md)).
+- [Rainbow Brackets](https://plugins.jetbrains.com/plugin/10080-rainbow-brackets): Makes understanding nested parentheses and brackets that are common in JS/TS easier to understand.
+ 
+## More Information
+
+---
+### Relevant documentation
+- [Google Cloud compute engine](https://cloud.google.com/compute/)
+- [Airtable](https://airtable.com/appCiX72O5Fc9qfOo/api/docs#javascript/introduction)
+- [Mapbox](https://docs.mapbox.com/)
+
+### Contacting me
+If there's anything that needs clarification, I would be happy to help. You can contact me by emailing [nathan.nestor@outlook.com](mailto:nathan.nestor@outlook.com)
