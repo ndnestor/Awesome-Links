@@ -14,7 +14,7 @@ const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 // Other variable declarations
 const cachedRecords = {};
 const TABLES_TO_CACHE = ['Employees', 'Locations'];
-const CACHE_UPDATE_INTERVAL = 10000;
+const CACHE_UPDATE_INTERVAL = 10000; // In ms
 const MAX_DB_REQUESTS_PER_SECOND = 4; // Airtable can handle 5 with free version. Put 4 just to be safe
 const onCacheUpdateCallbacks = [];
 let timeSinceLastDbRequest; // In ms
@@ -98,16 +98,12 @@ export class methods {
                 cachedRecords[tableName].forEach(record => {
                     // Find records that match the search query
                     //? Consider changing the search query
-                    if(isExact) {
-                        if(record['fields'][fieldName] === fieldValue) {
+                    if(!isExact && typeof record['fields'][fieldName] === 'string') {
+                        if(record[fieldName].contains(fieldValue)) {
                             searchResults.push(record);
                         }
                     } else {
-                        if(typeof record['fields'][fieldName] === 'string') {
-                            if(record[fieldName].contains(fieldValue)) {
-                                searchResults.push(record);
-                            }
-                        } else if(record['fields'][fieldName] === fieldValue) {
+                        if(record['fields'][fieldName] === fieldValue) {
                             searchResults.push(record);
                         }
                     }
