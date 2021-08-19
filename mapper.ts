@@ -1,4 +1,4 @@
-export {};
+export {} //TODO: Check if I need this
 
 // Module imports
 const Https = require('https');
@@ -10,13 +10,13 @@ import { imageManipulator } from './image-manipulator';
 import { methods as logger } from './global-logger';
 import { statusCodes } from "./http-constants";
 
-//const airtableInterface = require('./airtable-intereface.js');
 const settings = require('./settings.js');
 
 // Other variable declarations
-const MARKER_ICON_PATH = './public/mapbox-marker.png'; // TODO: Move marker icon out of public folder
+const MARKER_ICON_PATH = './public/mapbox-markers/1.png';
 const MARKER_FONT_PATH = './fonts/bahnschrift/bahnschrift.fnt';
 const MARKER_IMAGE_EXTENSION = 'png';
+const markerCollapseDistance = 1;
 let cachedVisibleMarkers = [];
 
 // Interface declarations
@@ -35,7 +35,6 @@ airtableInterface.addOnCacheCallback(() => methods.cacheVisibleMarkers());
 export class methods {
 
     // Returns a feature collection of markers for use with an interactive Mapbox map
-    //! Has not been tested with markers that collapse together
     public static cacheVisibleMarkers() {
         logger.info('Caching visible markers');
         return new Promise<void>(async(resolve) => {
@@ -122,21 +121,24 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
         const LOCATION_URL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${city}+${state}+${country}
                               .json?access_token=${settings.MAPBOX_TOKEN}`;
 
+        // Request the longitude-latitude coordinates of the location
         Https.get(LOCATION_URL, (res) => {
             logger.info(`Location geocoding response has status code "${res.statusCode}"`);
 
+            // Check the response status code
             if(res.statusCode !== statusCodes.OK) {
                 logger.warn(`Mapbox geocoding API for coordinates has response code "${res.statusCode}"`);
                 reject();
             }
 
+            // Compile all the response data chunks
             let geocodingData = '';
             res.on('data', (dataChunk) => {
                 geocodingData += dataChunk;
             });
 
+            // Return the longitude-latitude coordinates of the location
             res.on('end', () => {
-                // Return the longitude-latitude coordinates of the location
                 let center = JSON.parse(geocodingData).features[0]['center'];
                 resolve({ x: center[0], y: center[1] });
             });
@@ -149,11 +151,10 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
 }
 
 // Converts a Mapbox feature collection of markers into an array of visible markers
-// TODO: Make interface for markers
 function getVisibleMarkers(markers) {
     const visibleMarkers = [];
-    const markerCollapseDistance = 1; // TODO: Move to top
 
+    // Loop through the markers
     markers.features.forEach((marker) => {
         const markerCoords = marker.geometry.coordinates;
 
@@ -194,6 +195,7 @@ function averageCoordinates(pointA, pointB) {
     return [(pointA[0] + pointB[0]) / 2, (pointA[1] + pointB[1]) / 2];
 }
 
+// Replaces all instances of searchTarget in a given string with a replacement string
 function replaceAll(string, searchTarget, replacement) {
     return string.split(searchTarget).join(replacement);
 }

@@ -5,33 +5,40 @@ RELEASE_BRANCH="master"
 TS_BUILD_PATH="./typescript-build/" # Requires trailing slash
 ENTRY_FILE="main.js"
 
-# Checkout the release branch
-#! If git fails to checkout the release branch, the master branch will be used by default
-echo "Performing git checkout on the release branch"
-sudo git checkout $RELEASE_BRANCH
+if [ "$1" != "init" ]
+then
+  # Checkout the release branch
+  #! If git fails to checkout the release branch, the master branch will be used by default
+  echo "Performing git checkout on the release branch"
+  git checkout $RELEASE_BRANCH
 
-# Update the repo
-echo -e "===\nPulling changes from git repository"
-sudo git pull
+  # Update the repo
+  echo -e "===\nPulling changes from git repository"
+  git pull
+fi
 
 # Install node modules as needed
 echo -e "===\nInstalling npm packages as needed"
-sudo npm install
-sudo npm install -g typescript
+npm install
+npm install -g typescript
 
 # Create the required file paths
 echo -e "===\nMaking necessary directories"
-sudo mkdir logs
-sudo mkdir public
-sudo mkdir $TS_BUILD_PATH
+mkdir logs
+mkdir public
+mkdir $TS_BUILD_PATH
 
 # Build typescript files
+if [ "$1" == "init" ]
+then
+  exit 0
+fi
 echo -e "===\nBuilding typescript files"
-sudo tsc
+tsc
 
 # Run the server code
 echo -e "===\nStarting server"
-sudo node -r source-map-support/register $TS_BUILD_PATH$ENTRY_FILE
+node -r source-map-support/register $TS_BUILD_PATH$ENTRY_FILE
 
 # Print a message when server execution has ended
 echo -e "===\nProgram execution has ended"

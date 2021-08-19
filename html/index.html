@@ -27,6 +27,9 @@
 
     <script>
 
+        //! NOTE: This file is just a test of features
+        //! When starting on building up the frontend, you can replace this file if you'd like to
+
         // Set up Mapbox GL
         mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuYXdlc29tZWluYyIsImEiOiJja3F0bW9jMnkyNmdoMnZtejNjMTg0czRyIn0.x6imIZ-pCiJaIOMX3SdoQg';
         const map = new mapboxgl.Map({
@@ -43,14 +46,8 @@
                 markerElement.className = 'marker';
 
                 // Get the image to use for the marker
-                const numChildMarkers = marker.childMarkers.length;
                 let backgroundImage;
-                console.log(JSON.stringify(marker));
-                if(numChildMarkers === 1) {
-                    backgroundImage = `url('/public/mapbox-marker.png')`;
-                } else {
-                    backgroundImage = `url('/public/mapbox-markers/${marker.childMarkers.length}.png')`;
-                }
+                backgroundImage = `url('/public/mapbox-markers/${marker.childMarkers.length}.png')`;
                 markerElement.style.backgroundImage = backgroundImage;
 
                 new mapboxgl.Marker(markerElement).setLngLat(marker.coordinates).addTo(map);

@@ -6,11 +6,12 @@ import { methods as logger } from './global-logger';
 
 export class imageManipulator {
 
-    // Overlay text on an image at the specified relative position
-    // TODO: Add offset parameter
+    // Adds text to the right side of an image while keeping the center of the image at the same spot as the original image
+    //? Perhaps add an "space between image and text" parameter
     public static appendText(imagePath: string, fontPath: string, outPath: string, text: string): Promise<void> {
+        logger.debug('Appending text to an image');
         return new Promise((resolve, reject) => {
-            // TODO: Add logging
+
             // Read the image from file
             Jimp.read(imagePath).then((srcImage) => {
 
@@ -23,14 +24,14 @@ export class imageManipulator {
                     const textHeight = Jimp.measureTextHeight(font, text);
                     const canvasHeight = srcImage.bitmap.height;
                     if(textHeight > canvasHeight) {
-                        // TODO: Throw error as this may cause problems
+                        logger.error('Text height should not be greater than canvas height when appending text');
                         reject();
                     }
 
                     // Create the image canvas
                     new Jimp(canvasWidth, canvasHeight, '#00000000', (error, canvas) => {
                         if(error !== null) {
-                            // TODO: Throw error
+                            logger.error(`Could not create image canvas when appending text due to error\n${error}`);
                             reject();
                         }
 
@@ -52,8 +53,7 @@ export class imageManipulator {
                 });
 
             }).catch((error) => {
-                // TODO: Throw and log error
-                console.error(error.toString());
+                logger.error(`Could not read the image at path ${imagePath} when appending text\n${error}`);
                 reject();
             });
         });

@@ -14,11 +14,12 @@
 # Project-generated
 /logs/
 /typescript-build/
-/public/mapbox-markers/
+/public/mapbox-markers/*
+!/public/mapbox-markers/1.png
 
-# Personal files
+# Planning files
 *.drawio
 
-# HTTP Client
+# HTTP client
 *.http
 *.rest

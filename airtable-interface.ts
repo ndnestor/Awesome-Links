@@ -14,7 +14,7 @@ const airtableBase = Airtable.base('appCiX72O5Fc9qfOo');
 // Other variable declarations
 const cachedRecords = {};
 const TABLES_TO_CACHE = ['Employees', 'Locations'];
-const CACHE_UPDATE_INTERVAL = 10000;
+const CACHE_UPDATE_INTERVAL = 10000; // In ms
 const MAX_DB_REQUESTS_PER_SECOND = 4; // Airtable can handle 5 with free version. Put 4 just to be safe
 const onCacheUpdateCallbacks = [];
 let timeSinceLastDbRequest; // In ms
@@ -46,7 +46,7 @@ setInterval(() => {
 // -- PUBLIC METHODS -- //
 
 export class methods {
-    // Returns an array of records in the specified table and updates record cache
+    // Returns an array of records in the specified table and updates the record cache
     public static cacheRecords(tableName: string): Promise<object[]> {
         logger.debug(`Caching records for "${tableName}"`);
         return new Promise((resolve) => {
@@ -76,7 +76,7 @@ export class methods {
 
     // Return an array of records in the specified table synchronously
     // NOTE: Does not update the cache unlike cacheRecords()
-    public static getCachedRecords (tableName: string): object[] {
+    public static getCachedRecords(tableName: string): object[] {
         const result = cachedRecords[tableName];
         if(result === undefined) {
             logger.warn(`Table "${tableName}" has no cached records`);
@@ -84,8 +84,8 @@ export class methods {
         return result;
     }
 
-    // Returns an array of records by field value in specified table
-    public static searchInField (tableName: string, fieldName: string, fieldValue: any, isExact: boolean): Promise<object[]> {
+    // Returns an array of records by field value in the specified table
+    public static searchInField(tableName: string, fieldName: string, fieldValue: any, isExact: boolean): Promise<object[]> {
         logger.info(`Searching for record by field value. ` +
             `Looking for "${fieldValue}" in "${fieldName}" in "${tableName}"`);
         return new Promise((resolve, reject) => {
@@ -97,17 +97,13 @@ export class methods {
                 // Loop through records in table
                 cachedRecords[tableName].forEach(record => {
                     // Find records that match the search query
-                    //? Consider changing the search query later
-                    if(isExact) {
-                        if(record['fields'][fieldName] === fieldValue) {
+                    //? Consider changing the search query
+                    if(!isExact && typeof record['fields'][fieldName] === 'string') {
+                        if(record[fieldName].contains(fieldValue)) {
                             searchResults.push(record);
                         }
                     } else {
-                        if(typeof record['fields'][fieldName] === 'string') {
-                            if(record[fieldName].contains(fieldValue)) {
-                                searchResults.push(record);
-                            }
-                        } else if(record['fields'][fieldName] === fieldValue) {
+                        if(record['fields'][fieldName] === fieldValue) {
                             searchResults.push(record);
                         }
                     }
@@ -122,7 +118,7 @@ export class methods {
     }
 
     // Add a record to the specified table
-    public static addRecords (tableName: string, records: object): Promise<object[]> {
+    public static addRecords(tableName: string, records: object): Promise<object[]> {
         logger.info(`Adding record to "${tableName}"`)
         return new Promise((resolve, reject) => {
             handleDbRequest(() => {
@@ -136,8 +132,8 @@ export class methods {
         });
     }
 
-    // Deletes a record in the specified table
-    public static deleteRecords (tableName: string, recordIDs: string[]): Promise<object[]> {
+    // Delete records in the specified table using record IDs
+    public static deleteRecords(tableName: string, recordIDs: string[]): Promise<object[]> {
         logger.info(`Deleting record(s) from "${tableName}" with ID(s) "${recordIDs}"`);
         return new Promise((resolve, reject) => {
             handleDbRequest(() => {
@@ -151,7 +147,7 @@ export class methods {
         });
     }
 
-    // Adds an item to th onCacheCallbacks array
+    // Adds an item to the onCacheCallbacks array
     public static addOnCacheCallback(method: () => void): void {
         onCacheUpdateCallbacks.push(method);
     }
@@ -160,8 +156,12 @@ export class methods {
 
 // -- PRIVATE METHODS --//
 
-// Prevents database requests occurring too often
+// Prevents database requests occurring too often as Airtable only allows
 //! All database requests should be handled through this
+// TODO: Determine if this method works when multiple requests are deferred at once. It don't think it does :(
+//! It may be preferable to switch to a new method of handling database requests if it is too hard to get it to work
+//! Now that I am checking the Airtable website again, I cannot find the limit of db requests per second so they may have
+//! removed it which means that this method would not be needed anymore. May be worth emailing support about
 function handleDbRequest(method): void {
     // Check if we are sending requests too fast
     let timeoutTime = 0;
