@@ -169,7 +169,7 @@ app.get('/public/:resource*', (req, res) => {
 });
 
 // Sends an HTTP response back to the client
-// TODO: Flesh out method to handle changing content headers
+// TODO: Implement changing the content header of the HTTP response based on what content was sent
 function endResponse(res, statusCode, sendType=undefined, sendContent=undefined) {
 
     // Send log message based on status code

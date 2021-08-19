@@ -156,9 +156,12 @@ export class methods {
 
 // -- PRIVATE METHODS --//
 
-// Prevents database requests occurring too often
+// Prevents database requests occurring too often as Airtable only allows
 //! All database requests should be handled through this
-// TODO: Determine if this method works when multiple requests are deferred at once. It probably does not
+// TODO: Determine if this method works when multiple requests are deferred at once. It don't think it does :(
+//! It may be preferable to switch to a new method of handling database requests if it is too hard to get it to work
+//! Now that I am checking the Airtable website again, I cannot find the limit of db requests per second so they may have
+//! removed it which means that this method would not be needed anymore. May be worth emailing support about
 function handleDbRequest(method): void {
     // Check if we are sending requests too fast
     let timeoutTime = 0;

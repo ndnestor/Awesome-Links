@@ -116,8 +116,8 @@ export class methods {
     }
 
     // Resolves when writeFileBuffer is empty or rejects if if times out
-    //! Relatively untested. In fact, it likely does not work D:
-    // TODO: Fix
+    //! Relatively untested
+    // TODO: Make sure this method works
     public static waitForWrite(): Promise<void> {
         return new Promise((resolve, reject) => {
             setInterval(() => {

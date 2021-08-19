@@ -6,8 +6,8 @@ import { methods as logger } from './global-logger';
 
 export class imageManipulator {
 
-    // Overlay text on an image at the specified relative position
-    //? Perhaps add an offset parameter
+    // Adds text to the right side of an image while keeping the center of the image at the same spot as the original image
+    //? Perhaps add an "space between image and text" parameter
     public static appendText(imagePath: string, fontPath: string, outPath: string, text: string): Promise<void> {
         logger.debug('Appending text to an image');
         return new Promise((resolve, reject) => {
