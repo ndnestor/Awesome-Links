@@ -14,10 +14,13 @@
   - [settings.ts](#settingsts)
   - [startup.sh](#startupsh)
 - [Style Guide](#style-guide)
+- [Where to Start](#where-to-start)
 
 ## Code Files
 
 ---
+The following is a description of all code files and the variables / methods that you may often use or that are very important.
+
 ### main.ts
 This is the entry point of the program. It deals with initializing the server and terminating it. As well, it is the communication point between the client and the rest of the server as all HTTP requests go through it and all HTTP responses are sent from it.
 
@@ -47,14 +50,14 @@ A wrapper for the JS Logger library. This file deals with writing log messages t
  * although you could imitate the same behavior by setting this variable to 1 */
 waitFileInterval: number
 
-// The maximum allow amound of time it should take to write messages to a log file in milliseconds
+// The maximum allowed amount of time it should take to write messages to a log file in milliseconds
 waitForWriteTimeout: number
 ```
 
 #### Important methods
 ```typescript
 // These methods all send a log message with different levels
-// Message: The mesage to log
+// Message: The message to log
 debug(message): void
 info(message): void
 warn(message): void
@@ -63,7 +66,7 @@ error(message): void
 // Logs the current stack trace
 trace(): void
         
-// Returns a promise which esolves when there are no logs to write to file or rejects if it times out
+// Returns a promise which resolves when there are no logs to write to file or rejects if it times out
 waitForWrite(): Promise<void>
 ```
 
@@ -75,7 +78,7 @@ Serves as the communication point between the Airtable database and the rest of 
 // Contains database records that may be outdated. Call cacheRecords(tableName) to update a table's cache
 cachedRecords: object
 
-// These tables will have their chaches updated periodically
+// These tables will have their caches updated periodically
 TABLES_TO_CACHE: string[]
 ```
 
@@ -93,7 +96,7 @@ getCachedRecords(tableName): object[]
 // tableName: The table to search
 // fieldName: The field to search within the table
 // fieldValue: The field value that is being searched for
-// isExact: Only affects the result if fieldValue is a string. If true, string must match exactly. If false, string only needs to be constained in the record
+// isExact: Only affects the result if fieldValue is a string. If true, string must match exactly. If false, string only needs to be contained in the record
 searchInField(tableName, fieldName, fieldValue, ixExact): Promise<object[]>
         
 // Adds a record to the database
@@ -110,6 +113,13 @@ deleteRecords(tableName, recordIDs): Promise<object[]>
 ### mapper.ts
 Serves as the communication point between the Mapbox API and the rest of the server. It is the only file that uses Mapbox API calls aside from some frontend JS.
 
+#### Important variables
+```typescript
+// Markers on the map closer than this distance apart will be collapsed into one marker
+// The distance is measured in degrees (a.k.a. longitude-latitude distance)
+markerCollapseDistance: number
+```
+
 ### image-manipulator.ts
 Provides extra functionality to the Jimp library. It is the only file that uses the Jimp library.
 
@@ -122,6 +132,7 @@ Defines constants to be used when sending HTTP responses such as status codes.
 ### settings.ts
 Manages global constant properties to be accessed by multiple files. Originally created to prevent circular dependencies although it no longer serves much of a use. It may be wise to remove it or mark it as deprecated.
 
+#### Important methods
 ```typescript
 // Adds a constant property to the settings
 // key: The name of the setting
@@ -150,13 +161,13 @@ const IMMUTABLE_CONSTANT = 'some value that will never change';
 const mutableConstant = ObjectWhosePropertiesCanChange();
 let notConstant = 'a value that can change';
 
-// Open brace on the same line as condition
+// Open braces on the same line as condition
 if(condition) {
     
     // There is a space before every comment
     doSomething(); // Unless it comes after functioning code like this
     
-    // Immutable constants that are not at the root scope are written in cammel case
+    // Immutable constants that are not at the root scope are written in camel case
     const localConstant = 'a value';
 } else {
     
@@ -175,3 +186,6 @@ if(condition) {
 
 // There are two empty lines before a section header and one after
 ```
+
+## Where to Start
+Look at the TODOs scattered around the Typescript files to get an idea of little things that need to be done. That would be a good starting point.

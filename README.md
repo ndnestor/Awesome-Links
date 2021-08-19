@@ -26,7 +26,7 @@ git clone https://github.com/ndnestor/Awesome-Links.git
 cd Awesome-Links
 startup.sh init
 ```
-   
+
 ### For Linux
 1. Run the following commands or your package manager's equivalent:
 ```shell
@@ -57,7 +57,7 @@ A launch.json file is provided with this repo meaning that no set up is required
 Setting up WebStorm to run the project properly requires a few easy steps:
 1. Double tap shift.
 2. Search for and select "Edit Configurations...".
-3. Click the add button on the top left (it is a plus sign).
+3. Click the "add" button on the top left (it is a plus sign).
 4. Select Node.js
 5. Set the node parameter setting to "-r source-map-support/register".
 6. Set the JavaScript file setting to ".\typescript-build\main.js".
@@ -138,7 +138,7 @@ There is [documentation on the compute engine](https://cloud.google.com/compute/
 6. From the dropdown menu, click "Open in browser window".
 
 ### Updating and running the Server
-These are the steps for running the server on the current version of the master branch:
+These are the steps for running the server on the current version of the master branch (note that you will need to have generated a [personal access token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token) with the "repo" permission):
 1. [SSH into the server](#ssh-ing-into-the-server).
 2. [Reattach to the server's Screen](https://linuxize.com/post/how-to-use-linux-screen/#reattach-to-a-linux-screen). If there is not one, start a new [named Screen session](https://linuxize.com/post/how-to-use-linux-screen/#starting-named-session).
 3. [Stop the web server](#stopping-the-web-server) if it is already running.
@@ -147,7 +147,7 @@ These are the steps for running the server on the current version of the master 
 cd /srv/www/Awesome-Links
 sudo startup.sh
 ```
-5. When prompted for a password type "inceawesome957" (now that this password is in plain text here, it should probably be changed by making a new deploy key and deleting the old one)
+5. When prompted for a password type in the personal access token that you generated.
 
 After doing this, the server will run on the latest version of the master branch. It is worth noting that although the server will be running with the updated files, the old `startup.sh` will still be used. For this reason, if the master branch contains a new `startup.sh` file, you will need to [stop the web server](#stopping-the-web-server) and type `sudo startup.sh` again after the server starts the first time.
 
@@ -157,7 +157,7 @@ There are many ways to stop the web server (turning off VM instance, using the `
 ## Managing the Database
 
 ---
-TODO: Complete this section
+You can view and make modifications to the database by going to [Airtable.com](https://airtable.com) and logging in with an account that has been given access to the database. The database can also be manipulated using the endpoints in main.ts and the methods in airtable-interface.ts (see the [code documentation](Code%20Documentation.md) for more info).
 
 ## Useful IDE Extensions
 
@@ -177,6 +177,14 @@ The default settings for the following extensions and plugins will work well eno
 ## More Information
 
 ---
+Some odds and ends that I did not think warranted each having their own section.
+
+### Code documentation
+You can find the code documentation [here](Code%20Documentation.md).
+
+### Generating .fnt files
+The [Jimp](#frameworks--libraries) library makes use of .fnt files. These files represent fonts and are an alternative to the standard .ttf font file. It is rare to find .fnt files lying around so knowing how to convert a .ttf file to a .fnt file is useful. You can use [Hiero](https://github.com/libgdx/libgdx/wiki/Hiero) to do so. Instructions on how to use it are on its homepage.
+
 ### Relevant documentation
 - [Google Cloud compute engine](https://cloud.google.com/compute/)
 - [Airtable](https://airtable.com/appCiX72O5Fc9qfOo/api/docs#javascript/introduction)
