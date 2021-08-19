@@ -64,7 +64,7 @@ Setting up WebStorm to run the project properly requires a few easy steps:
 7. Give the configuration a name.
 8. Click "OK".
 
-From there you can press ``Shift+F10`` to run it normally, ``Shift+F9`` to run in debug mode, or press the corresponding buttons on the top left.
+From there you can press ``Shift+F10`` to run it normally, ``Shift+F9`` to run in debug mode, or press the corresponding buttons on the top right.
 
 ## GitHub Process
 
@@ -152,7 +152,7 @@ sudo startup.sh
 After doing this, the server will run on the latest version of the master branch. It is worth noting that although the server will be running with the updated files, the old `startup.sh` will still be used. For this reason, if the master branch contains a new `startup.sh` file, you will need to [stop the web server](#stopping-the-web-server) and type `sudo startup.sh` again after the server starts the first time.
 
 ### Stopping the web server
-There are many ways to stop the web server (turning off VM instance, using the `kill` command, etc.) but the safest way is to press `Ctrl+C` while connected to the server's Screen instance. The server will gracefully exit by finishing up certain tasks before completely terminating. After that it is safe to turn off the VM instance if needed.
+There are many ways to stop the web server (turning off the VM instance, using the `kill` command, etc.) but the safest way is to press `Ctrl+C` while connected to the server's Screen instance. The server will gracefully exit by finishing up certain tasks before completely terminating. After that it is safe to turn off the VM instance if needed.
 
 ## Managing the Database
 
