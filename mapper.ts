@@ -1,4 +1,4 @@
-export {};
+export {} //TODO: Check if I need this
 
 // Module imports
 const Https = require('https');
@@ -10,13 +10,13 @@ import { imageManipulator } from './image-manipulator';
 import { methods as logger } from './global-logger';
 import { statusCodes } from "./http-constants";
 
-//const airtableInterface = require('./airtable-intereface.js');
 const settings = require('./settings.js');
 
 // Other variable declarations
-const MARKER_ICON_PATH = './public/mapbox-marker.png'; // TODO: Move marker icon out of public folder and add duplicated as 1.png
+const MARKER_ICON_PATH = './public/mapbox-markers/1.png';
 const MARKER_FONT_PATH = './fonts/bahnschrift/bahnschrift.fnt';
 const MARKER_IMAGE_EXTENSION = 'png';
+const markerCollapseDistance = 1;
 let cachedVisibleMarkers = [];
 
 // Interface declarations
@@ -35,7 +35,6 @@ airtableInterface.addOnCacheCallback(() => methods.cacheVisibleMarkers());
 export class methods {
 
     // Returns a feature collection of markers for use with an interactive Mapbox map
-    //! Has not been tested with markers that collapse together
     public static cacheVisibleMarkers() {
         logger.info('Caching visible markers');
         return new Promise<void>(async(resolve) => {
@@ -152,10 +151,8 @@ function getLocationCoords(location: Location ): Promise<{ x: Number, y: Number 
 }
 
 // Converts a Mapbox feature collection of markers into an array of visible markers
-// TODO: Make interface for markers
 function getVisibleMarkers(markers) {
     const visibleMarkers = [];
-    const markerCollapseDistance = 1; // TODO: Move to top
 
     // Loop through the markers
     markers.features.forEach((marker) => {
